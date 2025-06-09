@@ -1,4 +1,5 @@
 import React from 'react'
+import { logo } from '../assets'
 
 const Footer = () => {
   return (
@@ -7,13 +8,15 @@ const Footer = () => {
         {/* Company Info / Logo */}
         <div className="col-span-full md:col-span-1">
           <div className="flex items-center justify-center md:justify-start space-x-2 mb-4">
-            <svg className="w-8 h-8 text-blue-500" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18c-4.411 0-8-3.589-8-8s3.589-8 8-8 8 3.589 8 8-3.589 8-8 8zm-1-13h2v6h-2V7zm0 8h2v2h-2v-2z"></path>
-            </svg>
-            <span className="text-xl font-bold text-white">Friendify</span>
+            <img src={logo} className='h-14 w-14' />
+            <span className="text-xl font-bold text-white">
+            <span className="text-blue-500">Li</span>
+            <span className="text-pink-500">nk</span>
+            <span className="text-green-500">el</span>
+            </span>
           </div>
           <p className="text-center md:text-left text-gray-400">
-            &copy; 2025 Friendify. All Rights Reserved.
+            &copy; 2025 Linkel. All Rights Reserved.
           </p>
         </div>
 

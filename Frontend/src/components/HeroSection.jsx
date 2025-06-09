@@ -1,7 +1,7 @@
 import React from "react";
 import { friendShip } from "../assets";
 import Tilt from "react-parallax-tilt";
-import {Typewriter} from "react-simple-typewriter";
+import { Typewriter } from "react-simple-typewriter";
 
 const HeroSection = () => {
   return (
@@ -15,15 +15,21 @@ const HeroSection = () => {
           <h1 className="text-4xl md:text-6xl font-extrabold leading-tight text-gray-900 mb-6">
             A Smarter Way to <br className="hidden sm:inline" />
             <span className="text-blue-500">
-            <Typewriter
-              words={[" Form Friendships"]}
-              loop={false}
-              cursor
-              cursorStyle="_"
-              typeSpeed={150}
-              deleteSpeed={100}
-              delaySpeed={2000}
-            />
+              <Typewriter
+                words={[
+                  "Form Friendships",
+                  "Build Connections",
+                  "Grow Together",
+                  "Create Moments",
+                  "Stay in Touch",
+                ]}
+                loop={false}
+                cursor
+                cursorStyle="_"
+                typeSpeed={150}
+                deleteSpeed={100}
+                delaySpeed={2000}
+              />
             </span>
           </h1>
           <p className="text-lg md:text-xl text-gray-600 mb-8">

@@ -15,7 +15,7 @@ const LandingHeader = () => {
         {/* Logo */}
         <div className="flex items-center space-x-2">
           <img src={logo} alt="logo" />
-          <span className="text-4xl font-bold text-gray-900">
+          <span className="text-4xl font-bold">
             <span className="text-blue-500">Li</span>
             <span className="text-pink-500">nk</span>
             <span className="text-green-500">el</span>

@@ -36,10 +36,8 @@ const HelpSection = () => {
                 <Typewriter
                   words={[item.title]}
                   loop={false}
-                  cursor
-                  cursorStyle="_"
                   typeSpeed={150}
-                  deleteSpeed={100}
+                  deleteSpeed={false}
                   delaySpeed={2000}
                 />
               </h3>
