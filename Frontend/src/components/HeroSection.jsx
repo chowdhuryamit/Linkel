@@ -2,8 +2,10 @@ import React from "react";
 import { friendShip } from "../assets";
 import Tilt from "react-parallax-tilt";
 import { Typewriter } from "react-simple-typewriter";
+import { useNavigate } from "react-router-dom";
 
 const HeroSection = () => {
+  const navigate=useNavigate();
   return (
     <section
       id="home"
@@ -36,7 +38,7 @@ const HeroSection = () => {
             Connect with like-minded individuals, build genuine relationships,
             and explore new experiences together.
           </p>
-          <button className="bg-blue-700 text-white font-bold px-8 py-4 rounded-full shadow-lg hover:scale-105 duration-200">
+          <button className="bg-blue-700 text-white font-bold px-8 py-4 rounded-full shadow-lg hover:scale-105 duration-200" onClick={()=>navigate('/signup')}>
             Explore Now
           </button>
         </div>

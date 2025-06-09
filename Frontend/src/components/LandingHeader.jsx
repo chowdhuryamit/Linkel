@@ -1,9 +1,11 @@
 import React from "react";
 import { useState } from "react";
 import { logo,mobileMenuIcon,mobileMenuOverlay} from "../assets/index.js";
+import { useNavigate } from "react-router-dom";
 
 const LandingHeader = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -57,7 +59,7 @@ const LandingHeader = () => {
         </nav>
 
         {/* Call to Action Button */}
-        <button className="hidden md:block bg-blue-700 text-white px-6 py-2 rounded-full shadow-lg hover:bg-blue-800 transition-colors duration-200 transform hover:scale-105">
+        <button className="hidden md:block bg-blue-700 text-white px-6 py-2 rounded-full shadow-lg hover:bg-blue-800 transition-colors duration-200 transform hover:scale-105" onClick={()=>navigate('/signup')}>
           Sign Up
         </button>
 
@@ -124,7 +126,7 @@ const LandingHeader = () => {
           </nav>
           <button
             className="mt-8 w-full bg-blue-700 text-white px-6 py-3 rounded-full shadow-lg hover:bg-blue-800 transition-colors duration-200 transform hover:scale-105"
-            onClick={toggleMobileMenu}
+            onClick={()=>navigate('/signup',toggleMobileMenu)}
           >
             Sign Up
           </button>

@@ -17,5 +17,5 @@ export{
     features,
     steps,
     testimonials,
-    newsLatter
+    newsLatter,
 }

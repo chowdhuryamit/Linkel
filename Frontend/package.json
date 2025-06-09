@@ -13,7 +13,9 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-parallax-tilt": "^1.7.296",
+    "react-router-dom": "^7.6.2",
     "react-simple-typewriter": "^5.0.1",
+    "react-toastify": "^11.0.5",
     "react-vertical-timeline-component": "^3.5.3"
   },
   "devDependencies": {
