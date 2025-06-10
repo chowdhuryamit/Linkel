@@ -1,8 +1,31 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react"
+import { signInWithPopup } from "firebase/auth"
+import { auth,provider } from "../service/firebase"
+import axios from 'axios'
+import {toast} from 'react-toastify'
 
 function Signup() {
   const [formVisible, setFormVisible] = useState(false);
-  const [state, setState] = useState("signup"); // 'signup' or 'signin'
+  const [state, setState] = useState("signup");
+
+  const handleGoogleOauth=async ()=>{
+    try {
+      const result=await signInWithPopup(auth,provider);
+      const idToken =await result.user.getIdToken();
+      const res=await axios.post('http://localhost:8000/api/u1/verify/signup/credentials',{idToken},{withCredentials:true})
+      if(res.data.success){
+        toast.success(res.data.message);
+        console.log(res);
+      }
+      else{
+        toast.error(res.message);
+        console.log(res);
+      }
+    } catch (error) {
+      toast.error(error.response.data.message);
+      console.log(error);
+    }
+  }
 
   useEffect(() => {
     setFormVisible(true);
@@ -34,7 +57,7 @@ function Signup() {
           <button className="flex items-center justify-center w-full px-4 py-2 sm:py-2.5 bg-blue-400 hover:bg-blue-500 text-white font-medium rounded-md shadow-sm transition-transform duration-300 ease-in-out hover:scale-105">
             Twitter
           </button>
-          <button className="flex items-center justify-center w-full px-4 py-2 sm:py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md shadow-sm transition-transform duration-300 ease-in-out hover:scale-105">
+          <button className="flex items-center justify-center w-full px-4 py-2 sm:py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md shadow-sm transition-transform duration-300 ease-in-out hover:scale-105" onClick={handleGoogleOauth}>
             Google
           </button>
         </div>
