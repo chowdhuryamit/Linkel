@@ -3,10 +3,12 @@ import { signInWithPopup } from "firebase/auth"
 import { auth,provider } from "../service/firebase"
 import axios from 'axios'
 import {toast} from 'react-toastify'
+import { useNavigate } from "react-router-dom"
 
 function Signup() {
   const [formVisible, setFormVisible] = useState(false);
   const [state, setState] = useState("signup");
+  const navigate = useNavigate();
 
   const handleGoogleOauth=async ()=>{
     try {
@@ -14,8 +16,9 @@ function Signup() {
       const idToken =await result.user.getIdToken();
       const res=await axios.post('http://localhost:8000/api/u1/verify/signup/credentials',{idToken},{withCredentials:true})
       if(res.data.success){
-        toast.success(res.data.message);
-        console.log(res);
+        toast.success(res.data.message,{
+          onClose:()=>{navigate('/home')}
+        });
       }
       else{
         toast.error(res.message);

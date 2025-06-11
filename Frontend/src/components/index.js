@@ -6,6 +6,11 @@ import HowItWorksSection from "./HowItWorksSection";
 import LandingHeader from "./LandingHeader";
 import NewsletterSection from "./NewsletterSection";
 import TestimonialsSection from "./TestimonialsSection";
+import Notification from "./Notification";
+import Messages from "./Messages";
+import FriendList from "./FriendList";
+import ChatRoom from "./ChatRoom";
+import BookmarkPage from "./BookmarkPage";
 
 
 export{
@@ -16,5 +21,10 @@ export{
     HowItWorksSection,
     LandingHeader,
     NewsletterSection,
-    TestimonialsSection
+    TestimonialsSection,
+    Notification,
+    Messages,
+    FriendList,
+    ChatRoom,
+    BookmarkPage
 }

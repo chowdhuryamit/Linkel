@@ -1,3 +1,5 @@
+import { Home, Bell, MessageSquare, Users, Bookmark, Search, Image, Video, BarChart, ChevronDown, MoreHorizontal, Heart, MessageCircle, Share2, UserCircle, PlusCircle, Settings, LogOut, Camera, Code } from 'lucide-react';
+
 export const helpItems = [
   {
     icon: (
@@ -214,3 +216,156 @@ export const testimonials = [
     bgColor: "bg-indigo-200"
   },
 ];
+export const posts = [
+  {
+    id: 1,
+    userName: "Briansky",
+    userHandle: "@briansky",
+    time: "8 minutes ago",
+    text: "Beautiful art ✨ #art #aesthetics #wallstreet #wallpaper #photography",
+    imageUrl: "https://placehold.co/600x400/D1D5DB/1F2937?text=Abstract+Art", // Placeholder image
+    likes: "326k",
+    comments: "123",
+    shares: "148",
+    userAvatar: "https://placehold.co/40x40/B3E0FF/1F2937?text=B" // Placeholder avatar
+  },
+  {
+    id: 2,
+    userName: "CreativeMind",
+    userHandle: "@creativemind",
+    time: "2 hours ago",
+    text: "Just finished a new design project. What do you think? #design #uiux #webdesign",
+    imageUrl: "https://placehold.co/600x350/C5E3BF/1F2937?text=Web+Design", // Placeholder image
+    likes: "1.2k",
+    comments: "45",
+    shares: "20",
+    userAvatar: "https://placehold.co/40x40/FFDDC1/1F2937?text=C" // Placeholder avatar
+  },
+  {
+    id: 3,
+    userName: "ArtLover",
+    userHandle: "@artlover",
+    time: "5 hours ago",
+    text: "Exploring new techniques in digital painting. So much to learn! #digitalart #painting #creative",
+    imageUrl: "https://placehold.co/600x450/B0E0E6/1F2937?text=Digital+Painting",
+    likes: "800",
+    comments: "30",
+    shares: "15",
+    userAvatar: "https://placehold.co/40x40/ADD8E6/1F2937?text=A"
+  },
+  {
+    id: 4,
+    userName: "TechGeek",
+    userHandle: "@techgeek",
+    time: "1 day ago",
+    text: "Just got my hands on the new AI dev kit. Excited to build something cool! #AI #tech #innovation",
+    imageUrl: "https://placehold.co/600x380/DDA0DD/1F2937?text=AI+Dev+Kit",
+    likes: "2.5k",
+    comments: "70",
+    shares: "40",
+    userAvatar: "https://placehold.co/40x40/E6E6FA/1F2937?text=T"
+  },
+  {
+    id: 5,
+    userName: "FoodieFan",
+    userHandle: "@foodiefan",
+    time: "2 days ago",
+    text: "Cooked up a storm tonight! This homemade pasta is a game-changer. 🍝 #cooking #foodlover #pasta",
+    imageUrl: "https://placehold.co/600x420/F0F8FF/1F2937?text=Homemade+Pasta",
+    likes: "950",
+    comments: "50",
+    shares: "25",
+    userAvatar: "https://placehold.co/40x40/FFF0F5/1F2937?text=F"
+  },
+  {
+    id: 6,
+    userName: "Wanderlust",
+    userHandle: "@wanderlust",
+    time: "3 days ago",
+    text: "Chasing sunsets in the mountains. Every view is breathtaking! 🏞️ #travel #mountains #sunset",
+    imageUrl: "https://placehold.co/600x400/D8BFD8/1F2937?text=Mountain+Sunset",
+    likes: "3.1k",
+comments: "90",
+    shares: "60",
+    userAvatar: "https://placehold.co/40x40/FFDAB9/1F2937?text=W"
+  },
+  {
+    id: 7,
+    userName: "Bookworm",
+    userHandle: "@bookworm",
+    time: "4 days ago",
+    text: "Lost in a good book. What are you currently reading? 📖 #books #reading #fiction",
+    imageUrl: "https://placehold.co/600x400/ADD8E6/1F2937?text=Reading+Book",
+    likes: "600",
+    comments: "25",
+    shares: "10",
+    userAvatar: "https://placehold.co/40x40/B0E0E6/1F2937?text=B"
+  },
+  {
+    id: 8,
+    userName: "FitnessGuru",
+    userHandle: "@fitnessguru",
+    time: "5 days ago",
+    text: "Just crushed a new PR at the gym! Consistency is key. 💪 #fitness #workout #gymlife",
+    imageUrl: "https://placehold.co/600x400/F0FFF0/1F2937?text=Gym+Workout",
+    likes: "1.8k",
+    comments: "55",
+    shares: "30",
+    userAvatar: "https://placehold.co/40x40/98FB98/1F2937?text=G"
+  },
+  {
+    id: 9,
+    userName: "NatureLover",
+    userHandle: "@naturelover",
+    time: "6 days ago",
+    text: "Morning walk in the park. So peaceful! 🌳 #nature #park #peace",
+    imageUrl: "https://placehold.co/600x400/ADD8E6/1F2937?text=Park+Walk",
+    likes: "1.1k",
+    comments: "40",
+    shares: "22",
+    userAvatar: "https://placehold.co/40x40/B0E0E6/1F2937?text=N"
+  },
+  {
+    id: 10,
+    userName: "GamerPro",
+    userHandle: "@gamerpro",
+    time: "1 week ago",
+    text: "Epic win tonight! Who else is playing this game? 🎮 #gaming #gamer #esports",
+    imageUrl: "https://placehold.co/600x400/F0F8FF/1F2937?text=Gaming+Setup",
+    likes: "2.9k",
+    comments: "100",
+    shares: "75",
+    userAvatar: "https://placehold.co/40x40/E6E6FA/1F2937?text=G"
+  }
+];
+
+export const allActivities = [
+  { id: 1, type: "follow", userName: "Derea", time: "3m", userAvatar: "https://placehold.co/30x30/A0D9FF/1F2937?text=D" },
+  { id: 2, type: "like", userName: "Edinb", time: "22m", userAvatar: "https://placehold.co/30x30/FFC0CB/1F2937?text=E" },
+  { id: 3, type: "like", userName: "Praha_", time: "10h", userAvatar: "https://placehold.co/30x30/D3F8FF/1F2937?text=P" },
+  { id: 4, type: "like", userName: "Praha_", time: "10h", userAvatar: "https://placehold.co/30x30/D3F8FF/1F2937?text=P" },
+  { id: 5, type: "follow", userName: "Chandra", time: "1d", userAvatar: "https://placehold.co/30x30/D9FFD9/1F2937?text=C" },
+  { id: 6, type: "like", userName: "Rohan", time: "2d", userAvatar: "https://placehold.co/30x30/FFCCE5/1F2937?text=R" },
+  { id: 7, type: "follow", userName: "Sophia", time: "3d", userAvatar: "https://placehold.co/30x30/ADD8E6/1F2937?text=S" },
+  { id: 8, type: "like", userName: "Liam", time: "4d", userAvatar: "https://placehold.co/30x30/F0FFF0/1F2937?text=L" },
+];
+
+export const allSuggestions = [
+  { id: 1, userName: "Najid", relation: "Followed by Dina", userAvatar: "https://placehold.co/30x30/C0E0A0/1F2937?text=N" },
+  { id: 2, userName: "Sharle Dare", relation: "Followed", userAvatar: "https://placehold.co/30x30/FFB6C1/1F2937?text=S" },
+  { id: 3, userName: "Divasurvey", relation: "Suggested by you", userAvatar: "https://placehold.co/30x30/FFE4B5/1F2937?text=D" },
+  { id: 4, userName: "Jhonason", relation: "Followed by anshas", userAvatar: "https://placehold.co/30x30/ADD8E6/1F2937?text=J" },
+  { id: 5, userName: "Priya Sharma", relation: "You might know", userAvatar: "https://placehold.co/30x30/CCEEFF/1F2937?text=P" },
+  { id: 6, userName: "Amit Singh", relation: "Suggested for you", userAvatar: "https://placehold.co/30x30/D9FFD9/1F2937?text=A" },
+  { id: 7, userName: "Jessica Lee", relation: "Popular this week", userAvatar: "https://placehold.co/30x30/FFEFD5/1F2937?text=J" },
+  { id: 8, userName: "Mark Davis", relation: "Friends of friends", userAvatar: "https://placehold.co/30x30/E0FFFF/1F2937?text=M" },
+];
+
+export const allShortcuts = [
+    { id: 1, name: "Art and drawing", icon: PlusCircle },
+    { id: 2, name: "Dribble Pro", icon: Settings },
+    { id: 3, name: "Behance Creative", icon: Image },
+    { id: 4, name: "One Piece fish", icon: Bookmark },
+    { id: 5, name: "Photography Club", icon: Camera },
+    { id: 6, name: "Coding Community", icon: Code },
+  ];
