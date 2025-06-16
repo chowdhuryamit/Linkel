@@ -1,34 +1,58 @@
-import React, { useEffect, useState } from "react"
-import { signInWithPopup } from "firebase/auth"
-import { auth,provider } from "../service/firebase"
-import axios from 'axios'
-import {toast} from 'react-toastify'
-import { useNavigate } from "react-router-dom"
+import React, { useEffect, useState } from "react";
+import { ProviderId, signInWithPopup } from "firebase/auth";
+import { auth, provider } from "../service/firebase";
+import axios from "axios";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import {login,logout} from '../store/authSlice.js'
 
 function Signup() {
   const [formVisible, setFormVisible] = useState(false);
   const [state, setState] = useState("signup");
   const navigate = useNavigate();
+  const dispatch=useDispatch();
 
-  const handleGoogleOauth=async ()=>{
+  const handleGoogleOauth = async () => {
     try {
-      const result=await signInWithPopup(auth,provider);
-      const idToken =await result.user.getIdToken();
-      const res=await axios.post('http://localhost:8000/api/u1/verify/signup/credentials',{idToken},{withCredentials:true})
-      if(res.data.success){
-        toast.success(res.data.message,{
-          onClose:()=>{navigate('/home')}
-        });
+      if (state == "signup") {
+        const result = await signInWithPopup(auth, provider);
+        const idToken = await result.user.getIdToken();
+        const res = await axios.post(
+          "http://localhost:8000/api/u1/verify/signup/credentials",
+          { idToken },
+          { withCredentials: true }
+        );
+        if (res.data.success) {
+          dispatch(login({userData:res.data.userData}));
+          toast.success(res.data.message, {
+            onClose: () => {
+              navigate("/home");
+            },
+          });
+        }
       }
       else{
-        toast.error(res.message);
-        console.log(res);
+        const result = await signInWithPopup(auth,provider);
+        const idToken = await result.user.getIdToken();
+        const res = await axios.post("http://localhost:8000/api/u1/verify/signin/credentails",
+          {idToken,displayName:result.user.displayName,email:result.user.email,uid:result.user.uid,providerId:result.providerId},
+          {withCredentials:true}
+        );
+        if (res.data.success) {
+          dispatch(login({userData:res.data.userData}));
+          toast.success(res.data.message,{
+            onClose:()=>{
+              navigate("/home");
+            }
+          })
+        }
       }
     } catch (error) {
       toast.error(error.response.data.message);
       console.log(error);
     }
-  }
+  };
 
   useEffect(() => {
     setFormVisible(true);
@@ -42,7 +66,9 @@ function Signup() {
       }}
     >
       <div
-        className={`relative z-10 bg-white p-6 sm:p-8 md:p-10 rounded-lg shadow-xl w-full max-w-sm sm:max-w-md lg:max-w-lg transition-all duration-700 ease-out transform ${formVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}
+        className={`relative z-10 bg-white p-6 sm:p-8 md:p-10 rounded-lg shadow-xl w-full max-w-sm sm:max-w-md lg:max-w-lg transition-all duration-700 ease-out transform ${
+          formVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+        }`}
       >
         <h1 className="text-2xl sm:text-3xl font-bold text-center text-gray-800 mb-4">
           {state === "signup" ? "Create an Account" : "Login to Your Account"}
@@ -60,7 +86,10 @@ function Signup() {
           <button className="flex items-center justify-center w-full px-4 py-2 sm:py-2.5 bg-blue-400 hover:bg-blue-500 text-white font-medium rounded-md shadow-sm transition-transform duration-300 ease-in-out hover:scale-105">
             Twitter
           </button>
-          <button className="flex items-center justify-center w-full px-4 py-2 sm:py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md shadow-sm transition-transform duration-300 ease-in-out hover:scale-105" onClick={handleGoogleOauth}>
+          <button
+            className="flex items-center justify-center w-full px-4 py-2 sm:py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-md shadow-sm transition-transform duration-300 ease-in-out hover:scale-105"
+            onClick={handleGoogleOauth}
+          >
             Google
           </button>
         </div>

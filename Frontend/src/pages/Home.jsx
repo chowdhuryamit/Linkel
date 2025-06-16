@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Home,
   Bell,
@@ -30,20 +30,16 @@ import {
 import { logo } from "../assets/index.js";
 import { useNavigate } from "react-router-dom";
 import {Notification,Messages,BookmarkPage} from "../components/index.js";
+import { useSelector } from "react-redux";
 
 const Homepage = () => {
-  // State to manage 'See all' functionality for activity, suggestions, and shortcuts
+  //ui hooks
   const [showAllActivities, setShowAllActivities] = useState(false);
   const [showAllSuggestions, setShowAllSuggestions] = useState(false);
   const [showAllShortcuts, setShowAllShortcuts] = useState(false);
-  // State for mobile sidebar visibility
   const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false);
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
-  // State for active section (notifications, messages, users, bookmarks)
-  const [activeSection, setActiveSection] = useState(null); // 'notifications', 'messages', 'users', 'bookmarks'
-
-
-  // Determine which items to display based on 'See all' state
+  const [activeSection, setActiveSection] = useState(null);
   const activitiesToShow = showAllActivities
     ? allActivities
     : allActivities.slice(0, 4);
@@ -54,20 +50,29 @@ const Homepage = () => {
     0,
     showAllShortcuts ? allShortcuts.length : 4
   );
-  // Function to close both sidebars (e.g., when clicking outside on mobile)
   const closeSidebars = () => {
     setIsLeftSidebarOpen(false);
     setIsRightSidebarOpen(false);
   };
 
+  //my hooks
   const navigate = useNavigate();
+  const userStatus = useSelector((state)=>state.authStatus.status);
+  const userData= useSelector((state)=>state.authStatus.userData);
+  
+
+  useEffect(()=>{
+    if(!userStatus||userData==null){
+      navigate("/signup");
+    }
+  },[userData,userStatus])
 
   const handleLogout = async()=>{
 
   }
 
 
-
+  if(!userData) return null;
   return (
     <div
       className="min-h-screen font-inter text-gray-800 antialiased p-4 bg-gradient-to-r from-teal-50 to-blue-100 relative"
@@ -184,12 +189,12 @@ const Homepage = () => {
           {/* User Profile Card */}
           <div className="flex flex-col items-center p-4 border-b border-gray-200 mb-4">
             <img
-              src="https://placehold.co/80x80/FFDDC1/1F2937?text=R" // Placeholder avatar
+              src={userData.picture} // Placeholder avatar
               alt="Reinhard Van Zry"
               className="w-20 h-20 rounded-full mb-3 border-4 border-blue-500"
             />
-            <h2 className="font-semibold text-lg">Reinhard Van Zry</h2>
-            <p className="text-gray-500 text-sm">@reinhard_</p>
+            <h2 className="font-semibold text-lg">{userData.name}</h2>
+            <p className="text-gray-500 text-sm">{userData.username}</p>
             <div className="flex justify-around w-full mt-4 text-center">
               <div>
                 <p className="font-bold">250</p>
