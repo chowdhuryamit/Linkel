@@ -74,12 +74,14 @@ const userGoogleSignup = async (req, res) => {
 const userGoogleSignin = async (req, res) => {
   try {
     const { idToken, providerId, displayName, email, uid } = req.body;
-    if(!idToken||!providerId||!displayName||!email||!uid){
-      return res.status(400).json({success:false,message:"credentails are missing"});
+    if (!idToken || !providerId || !displayName || !email || !uid) {
+      return res
+        .status(400)
+        .json({ success: false, message: "credentails are missing" });
     }
 
     const decodedToken = await admin.auth().verifyIdToken(idToken);
-    
+
     if (
       decodedToken.name != displayName ||
       decodedToken.email != email ||
@@ -98,12 +100,10 @@ const userGoogleSignin = async (req, res) => {
       } else {
         const accessToken = await existingUser.generateAccesstoken();
         if (!accessToken) {
-          return res
-            .status(400)
-            .json({
-              success: false,
-              message: "error while generating access token",
-            });
+          return res.status(400).json({
+            success: false,
+            message: "error while generating access token",
+          });
         }
         const options = {
           httpOnly: true,
@@ -130,4 +130,42 @@ const userGoogleSignin = async (req, res) => {
   }
 };
 
-export { userGoogleSignup, userGoogleSignin };
+const getUser = async (req, res) => {
+  if (!req.user) {
+    return res
+      .status(400)
+      .json({ success: false, message: "user not logged in" });
+  }
+  const userData = req.user.toObject();
+  return res
+    .status(200)
+    .json({
+      success: true,
+      message: "user data fetched successfully",
+      userData,
+    });
+};
+
+const userLogout = async (req, res) => {
+  if (!req.user) {
+    return res
+      .status(400)
+      .json({ success: false, message: "user not logged in" });
+  }
+
+  const options = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+  };
+
+  return res
+    .status(200)
+    .clearCookie("_at", options)
+    .json({
+      success: true,
+      message: `${req.user.name} logged out successfully.`,
+    });
+};
+
+export { userGoogleSignup, userGoogleSignin, getUser, userLogout };

@@ -1,23 +1,29 @@
-import React, { useEffect } from 'react'
-import { Outlet, useNavigate } from 'react-router-dom'
-import {ToastContainer} from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css';
-import {useSelector} from 'react-redux'
+import React, { useEffect } from "react";
+import { Outlet, useNavigate } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { useDispatch, useSelector } from "react-redux";
+import axios from "axios";
+import { fetchUserData } from "./service/fetchUser.js";
+
 
 const App = () => {
-  const userStatus=useSelector((state)=>state.authStatus.status);
-  const navigate=useNavigate();
-  useEffect(()=>{
-    if(userStatus){
-      navigate('/home');
+  const userStatus = useSelector((state) => state.authStatus.status);
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  useEffect(() => {
+    if (userStatus) {
+      navigate("/home");
+    } else {
+      fetchUserData(dispatch,navigate,axios,toast);
     }
-  },[userStatus])
+  }, [userStatus]);
   return (
-   <>
-   <ToastContainer/>
-   <Outlet/>
-   </>
-  )
-}
+    <>
+      <ToastContainer />
+      <Outlet />
+    </>
+  );
+};
 
-export default App
+export default App;

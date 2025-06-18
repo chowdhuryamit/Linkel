@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from "react";
 import {
-  Home,
-  Bell,
-  MessageSquare,
-  Users,
-  Bookmark,
-  Search,
   Image,
   Video,
   BarChart,
@@ -14,12 +8,7 @@ import {
   Heart,
   MessageCircle,
   Share2,
-  UserCircle,
-  PlusCircle,
-  Settings,
-  LogOut,
-  Camera,
-  Code,Menu,X,
+  X,
 } from "lucide-react";
 import {
   posts,
@@ -27,9 +16,13 @@ import {
   allSuggestions,
   allShortcuts,
 } from "../assets/details.jsx";
-import { logo } from "../assets/index.js";
 import { useNavigate } from "react-router-dom";
-import {Notification,Messages,BookmarkPage} from "../components/index.js";
+import {
+  Notification,
+  Messages,
+  BookmarkPage,
+  Navbar,
+} from "../components/index.js";
 import { useSelector } from "react-redux";
 
 const Homepage = () => {
@@ -57,25 +50,19 @@ const Homepage = () => {
 
   //my hooks
   const navigate = useNavigate();
-  const userStatus = useSelector((state)=>state.authStatus.status);
-  const userData= useSelector((state)=>state.authStatus.userData);
-  
+  const userStatus = useSelector((state) => state.authStatus.status);
+  const userData = useSelector((state) => state.authStatus.userData);
 
-  useEffect(()=>{
-    if(!userStatus||userData==null){
+  useEffect(() => {
+    if (!userStatus || userData == null) {
       navigate("/signup");
     }
-  },[userData,userStatus])
+  }, [userData, userStatus]);
 
-  const handleLogout = async()=>{
-
-  }
-
-
-  if(!userData) return null;
+  if (!userData) return null;
   return (
     <div
-      className="min-h-screen font-inter text-gray-800 antialiased p-4 bg-gradient-to-r from-teal-50 to-blue-100 relative"
+      className="min-h-screen font-inter text-gray-800 antialiased p-4 relative"
       style={{
         backgroundImage:
           "linear-gradient(to top, #dbdcd7 0%, #dddcd7 24%, #e2c9cc 30%, #e7627d 46%, #b8235a 59%, #801357 71%, #3d1635 84%, #1c1a27 100%)",
@@ -90,83 +77,13 @@ const Homepage = () => {
       )}
 
       {/* Top Navigation Bar */}
-      <nav className="bg-white rounded-xl shadow-sm p-4 flex items-center justify-between mb-4 flex-wrap gap-y-2 sticky top-0 z-10 md:z-30">
-        {/* Left Section: Logo and Left Sidebar Toggle for mobile */}
-        <div className="flex-shrink-0 flex items-center gap-3">
-          {/* Left Sidebar Toggle (Mobile Only) */}
-          <button
-            className="md:hidden p-1"
-            onClick={() => setIsLeftSidebarOpen(!isLeftSidebarOpen)}
-          >
-            {/* Display X icon if sidebar is open, otherwise Menu icon */}
-            {isLeftSidebarOpen ? (
-              <X size={24} className="text-gray-600" />
-            ) : (
-              <Menu size={24} className="text-gray-600" />
-            )}
-          </button>
-          {/* Application Logo/Name */}
-          <div className="flex items-center space-x-2">
-            <img src={logo} alt="logo" />
-            <span className="text-4xl font-bold">
-              <span className="text-blue-500">Li</span>
-              <span className="text-pink-500">nk</span>
-              <span className="text-green-500">el</span>
-            </span>
-          </div>
-        </div>
-
-        {/* Middle Section: Search bar - full width on mobile, centered and growing on larger screens */}
-        <div className="relative w-full sm:w-auto flex-grow flex justify-center max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg mt-2 sm:mt-0 order-last sm:order-none">
-          <Search
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600"
-            size={18}
-          />
-          <input
-            type="text"
-            placeholder="Search..."
-            className="pl-10 pr-4 py-2 w-full bg-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        {/* Right Section: Navigation Icons and Right Sidebar Toggle for mobile */}
-        <div className="flex gap-4 sm:gap-6 items-center flex-wrap justify-center sm:justify-end">
-          {/* Navigation icons, now visible on all screen sizes by removing 'hidden sm:block' */}
-          <Home className="text-gray-500 hover:text-blue-600 cursor-pointer hover:scale-125" size={24} onClick={()=>{navigate('/home'),setActiveSection(null)}}/>
-          <Bell
-            className="text-gray-500 hover:text-blue-600 cursor-pointer hover:scale-125"
-            size={24}
-            onClick={() => setActiveSection('notifications')}
-          />
-          <MessageSquare
-            className="text-gray-500 hover:text-blue-600 cursor-pointer hover:scale-125"
-            size={24}
-            onClick={() => setActiveSection('messages')}
-          />
-          <Bookmark
-            className="text-gray-500 hover:text-blue-600 cursor-pointer hover:scale-125"
-            size={24}
-            onClick={() => setActiveSection('bookmarks')}
-          />
-          <LogOut
-            className="text-gray-500 hover:text-blue-600 cursor-pointer hover:scale-125"
-            size={24}
-            onClick={() => handleLogout}
-          />
-          {/* Right Sidebar Toggle (Mobile Only) */}
-          <button
-            className="md:hidden p-1"
-            onClick={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
-          >
-            {/* Display X icon if sidebar is open, otherwise MoreHorizontal icon */}
-            {isRightSidebarOpen ? (
-              <X size={24} className="text-gray-600" />
-            ) : (
-              <MoreHorizontal size={24} className="text-gray-600" />
-            )}
-          </button>
-        </div>
-      </nav>
+      <Navbar
+        isLeftSidebarOpen={isLeftSidebarOpen}
+        setIsLeftSidebarOpen={setIsLeftSidebarOpen}
+        isRightSidebarOpen={isRightSidebarOpen}
+        setIsRightSidebarOpen={setIsRightSidebarOpen}
+        setActiveSection={setActiveSection}
+      />
 
       {/* Main Content Area: Left Sidebar, Main Feed, Right Sidebar */}
       {/* The grid layout defines column spans for sidebars and main content */}
@@ -209,7 +126,7 @@ const Homepage = () => {
                 <p className="text-gray-500 text-xs">Following</p>
               </div>
             </div>
-            <button className="mt-5 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors w-full">
+            <button className="mt-5 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors w-full" onClick={()=>navigate('/profile')}>
               My Profile
             </button>
           </div>
@@ -245,26 +162,21 @@ const Homepage = () => {
         <main className="col-span-1 md:col-span-6 lg:col-span-6 space-y-4 overflow-y-auto">
           {" "}
           {/* Added overflow-y-auto for main content scroll */}
-
-          {activeSection === 'notifications' && (
+          {activeSection === "notifications" && (
             <div className="bg-white rounded-xl shadow-sm p-4">
-              <Notification/>
+              <Notification />
             </div>
           )}
-
-          {activeSection === 'messages' && (
+          {activeSection === "messages" && (
             <div className="bg-white rounded-xl shadow-sm p-4">
-              <Messages/>
+              <Messages />
             </div>
           )}
-
-          {activeSection === 'bookmarks' && (
+          {activeSection === "bookmarks" && (
             <div className="bg-white rounded-xl shadow-sm p-4">
-              <BookmarkPage/>
+              <BookmarkPage />
             </div>
           )}
-
-
           {/* Only show post feed and share card if no specific section is active */}
           {!activeSection && (
             <>
@@ -306,7 +218,10 @@ const Homepage = () => {
               </div>
               {/* Post Feed - Iterates through the posts array to display each post */}
               {posts.map((post) => (
-                <div key={post.id} className="bg-white rounded-xl shadow-sm p-4">
+                <div
+                  key={post.id}
+                  className="bg-white rounded-xl shadow-sm p-4"
+                >
                   {/* Post Header */}
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
@@ -316,7 +231,9 @@ const Homepage = () => {
                         className="w-10 h-10 rounded-full border-2 border-gray-200"
                       />
                       <div>
-                        <p className="font-semibold text-base">{post.userName}</p>
+                        <p className="font-semibold text-base">
+                          {post.userName}
+                        </p>
                         <p className="text-gray-500 text-sm">{post.time}</p>
                       </div>
                     </div>

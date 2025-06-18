@@ -11,6 +11,7 @@ import Messages from "./Messages";
 import FriendList from "./FriendList";
 import ChatRoom from "./ChatRoom";
 import BookmarkPage from "./BookmarkPage";
+import Navbar from "./Navbar";
 
 
 export{
@@ -26,5 +27,6 @@ export{
     Messages,
     FriendList,
     ChatRoom,
-    BookmarkPage
+    BookmarkPage,
+    Navbar
 }
