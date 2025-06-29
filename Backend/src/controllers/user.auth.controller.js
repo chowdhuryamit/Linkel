@@ -1,5 +1,18 @@
 import admin from "../firebase/firebase.config.js";
 import { User } from "../models/user.model.js";
+import { Follower } from "../models/followers.model.js";
+import streamifier from "streamifier";
+import { v2 as cloudinary } from "cloudinary";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_SECRET,
+  secure: true,
+});
 
 const userGoogleSignup = async (req, res) => {
   try {
@@ -49,9 +62,20 @@ const userGoogleSignup = async (req, res) => {
               secure: process.env.NODE_ENV === "production",
               sameSite: "lax",
             };
-            const userData = await User.findById(newUser._id).select(
-              "-password -uid -providerId"
-            );
+
+            const followers = await Follower.countDocuments({
+              following: newUser._id,
+            });
+            const following = await Follower.countDocuments({
+              follower: newUser._id,
+            });
+
+            const userData = newUser.toObject();
+            userData.followers = followers;
+            userData.following = following;
+            delete userData.password;
+            delete userData.uid;
+            delete userData.providerId;
 
             return res.status(200).cookie("_at", accessToken, options).json({
               success: true,
@@ -110,9 +134,20 @@ const userGoogleSignin = async (req, res) => {
           secure: process.env.NODE_ENV === "production",
           sameSite: "lax",
         };
+
+        const followers = await Follower.countDocuments({
+          following: existingUser._id,
+        });
+        const following = await Follower.countDocuments({
+          follower: existingUser._id,
+        });
+
         const userData = existingUser.toObject();
+        userData.followers = followers;
+        userData.following = following;
         delete userData.uid;
         delete userData.providerId;
+        delete userData.password;
         return res
           .status(200)
           .cookie("_at", accessToken, options)
@@ -136,14 +171,19 @@ const getUser = async (req, res) => {
       .status(400)
       .json({ success: false, message: "user not logged in" });
   }
+
+  const followers = await Follower.countDocuments({ following: req.user._id });
+  const following = await Follower.countDocuments({ follower: req.user._id });
+
   const userData = req.user.toObject();
-  return res
-    .status(200)
-    .json({
-      success: true,
-      message: "user data fetched successfully",
-      userData,
-    });
+  userData.followers = followers;
+  userData.following = following;
+
+  return res.status(200).json({
+    success: true,
+    message: "user data fetched successfully",
+    userData,
+  });
 };
 
 const userLogout = async (req, res) => {
@@ -168,4 +208,126 @@ const userLogout = async (req, res) => {
     });
 };
 
-export { userGoogleSignup, userGoogleSignin, getUser, userLogout };
+const updateUserProfile = async (req, res) => {
+  let userData = req.body;
+  try {
+    const usernameExist = await User.findOne({ username: userData.username });
+
+    if (usernameExist && !usernameExist._id.equals(req.user._id)) {
+      return res.status(400).json({
+        success: false,
+        message: "username already exist.try different username",
+      });
+    }
+
+    if (!req.user) {
+      return res
+        .status(400)
+        .json({ success: false, message: "user not authorized" });
+    }
+
+    // if(!req.user._id.equals(userData._id)){
+    //   console.log(req.user._id);
+    //   console.log(userData._id);
+
+    //   return res.status(400).json({success:false,message:"you are not authorized"})
+    // }
+
+    const url = req.user.picture;
+
+    if (req.file) {
+      console.log(userData.picture);
+      
+      const lastIndexBackslash = url.lastIndexOf("/");
+      const lastIndexDot = url.lastIndexOf(".");
+      const public_id = `likel_profile_pics/${url.substring(
+        lastIndexBackslash + 1,
+        lastIndexDot
+      )}`;
+      if (public_id) {
+        await cloudinary.uploader.destroy(public_id);
+      }
+
+      const streamUpload = (buffer) => {
+        return new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            {
+              folder: "likel_profile_pics",
+            },
+            (error, result) => {
+              if (result) resolve(result);
+              else reject(error);
+            }
+          );
+          streamifier.createReadStream(buffer).pipe(stream);
+        });
+      };
+
+      const result = await streamUpload(req.file.buffer);
+      if (!result) {
+        return res.status(400).json({
+          success: false,
+          message: "profile picture uploading failed! try again.",
+        });
+      }
+
+      const updatedUser = await User.findByIdAndUpdate(req.user._id, {
+        $set: {
+          name: userData.name,
+          bio: userData.bio,
+          tags: userData.tags,
+          username: userData.username,
+          picture: result.secure_url,
+          public: userData.public,
+        },
+      },{new:true});
+
+      userData = updatedUser.toObject();
+      delete userData.password;
+      delete userData.uid;
+      delete userData.providerId;
+
+      return res.status(200).json({
+        success: true,
+        message: "profile updated successfully",
+        userData,
+      });
+    }
+    else{
+      const updatedUser = await User.findByIdAndUpdate(req.user._id,{
+        $set:{
+          name:userData.name,
+          bio:userData.bio,
+          tags:userData.tags,
+          username:userData.username,
+          public:userData.public,
+        }
+      },{new:true})
+      userData = updatedUser.toObject();
+      delete userData.password;
+      delete userData.uid;
+      delete userData.providerId;
+
+      return res.status(200).json({
+        success: true,
+        message: "profile updated successfully",
+        userData,
+      });
+    }
+  } catch (error) {
+    console.log(error);
+
+    return res.status(400).json({
+      success: false,
+      message: "error occured while updating information",
+    });
+  }
+};
+
+export {
+  userGoogleSignup,
+  userGoogleSignin,
+  getUser,
+  userLogout,
+  updateUserProfile,
+};

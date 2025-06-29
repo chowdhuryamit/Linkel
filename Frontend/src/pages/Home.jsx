@@ -52,6 +52,7 @@ const Homepage = () => {
   const navigate = useNavigate();
   const userStatus = useSelector((state) => state.authStatus.status);
   const userData = useSelector((state) => state.authStatus.userData);
+  console.log(userData)
 
   useEffect(() => {
     if (!userStatus || userData == null) {
@@ -107,7 +108,8 @@ const Homepage = () => {
           <div className="flex flex-col items-center p-4 border-b border-gray-200 mb-4">
             <img
               src={userData.picture} // Placeholder avatar
-              alt="Reinhard Van Zry"
+              alt={userData.name}
+              crossOrigin="anonymous"
               className="w-20 h-20 rounded-full mb-3 border-4 border-blue-500"
             />
             <h2 className="font-semibold text-lg">{userData.name}</h2>

@@ -44,8 +44,20 @@ const userSchemma = new mongoose.Schema({
   providerId:{
     type:String,
     trim:true
+  },
+  bio:{
+    type:String,
+    default:"passionate linkel user"
+  },
+  tags:{
+    type:[String],
+    default:["Linkel"]
+  },
+  public:{
+    type:Boolean,
+    default:false
   }
-});
+},{timestamps:true});
 
 userSchemma.pre("save", async function (next) {
   if (this.password && this.isModified("password")) {
