@@ -1,9 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
-  Image,
-  Video,
-  BarChart,
-  ChevronDown,
   MoreHorizontal,
   Heart,
   MessageCircle,
@@ -22,6 +18,7 @@ import {
   Messages,
   BookmarkPage,
   Navbar,
+  CreatePost,
 } from "../components/index.js";
 import { useSelector } from "react-redux";
 
@@ -52,8 +49,16 @@ const Homepage = () => {
   const navigate = useNavigate();
   const userStatus = useSelector((state) => state.authStatus.status);
   const userData = useSelector((state) => state.authStatus.userData);
-  console.log(userData);
+  const [createPost,setCreatePost] = useState(false);
+  const postRef = useRef(null);
 
+  useEffect(()=>{
+    if(createPost){
+      postRef.current.scrollTo({top:0,behavior:"smooth"});
+    }
+    setCreatePost(false)
+  },[createPost])
+  
   useEffect(() => {
     if (!userStatus || userData == null) {
       navigate("/signup");
@@ -84,6 +89,7 @@ const Homepage = () => {
         isRightSidebarOpen={isRightSidebarOpen}
         setIsRightSidebarOpen={setIsRightSidebarOpen}
         setActiveSection={setActiveSection}
+        setCreatePost={setCreatePost}
       />
 
       {/* Main Content Area: Left Sidebar, Main Feed, Right Sidebar */}
@@ -168,7 +174,7 @@ const Homepage = () => {
           </div>
         </aside>
         {/* Main Content Feed - Scrolls independently within its grid area */}
-        <main className="col-span-1 md:col-span-6 lg:col-span-6 space-y-4 overflow-y-auto">
+        <main className="col-span-1 md:col-span-6 lg:col-span-6 space-y-4 overflow-y-auto" ref={postRef}>
           {" "}
           {/* Added overflow-y-auto for main content scroll */}
           {activeSection === "notifications" && (
@@ -189,43 +195,7 @@ const Homepage = () => {
           {/* Only show post feed and share card if no specific section is active */}
           {!activeSection && (
             <>
-              {/* Share Something Card */}
-              <div className="bg-white rounded-xl shadow-sm p-4">
-                <div className="flex items-center gap-3 mb-4">
-                  <img
-                    src={userData.picture}
-                    alt="Your Avatar"
-                    className="w-10 h-10 rounded-full border-2 border-blue-500"
-                  />
-                  <input
-                    type="text"
-                    placeholder="Share something..."
-                    className="flex-grow py-2 px-4 bg-gray-50 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                {/* Buttons for image, video, poll, and public setting */}
-                <div className="flex items-center justify-start flex-wrap gap-x-6 gap-y-2">
-                  <div className="flex gap-4">
-                    <button className="flex items-center gap-1 text-gray-600 hover:text-blue-600">
-                      <Image size={20} />
-                      <span>Image</span>
-                      
-                    </button>
-                    <button className="flex items-center gap-1 text-gray-600 hover:text-blue-600">
-                      <Video size={20} />
-                      <span>Video</span>
-                    </button>
-                    <button className="flex items-center gap-1 text-gray-600 hover:text-blue-600">
-                      <BarChart size={20} />
-                      <span>Poll</span>
-                    </button>
-                  </div>
-                  <div className="flex items-center gap-2 ml-auto">
-                    <span className="text-gray-600">Public</span>
-                    <ChevronDown size={16} className="text-gray-500" />
-                  </div>
-                </div>
-              </div>
+              <CreatePost userData={userData}/>
               {/* Post Feed - Iterates through the posts array to display each post */}
               {posts.map((post) => (
                 <div

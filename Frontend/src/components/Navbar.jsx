@@ -9,23 +9,11 @@ import {
     Home,
     Bell,
     MessageSquare,
-    Users,
     Bookmark,
     Search,
-    Image,
-    Video,
-    BarChart,
-    ChevronDown,
     MoreHorizontal,
-    Heart,
-    MessageCircle,
-    Share2,
-    UserCircle,
-    PlusCircle,
-    Settings,
     LogOut,
-    Camera,
-    Code,Menu,X,
+    Menu,X,PlusSquare
   } from "lucide-react";
 
 
@@ -33,7 +21,9 @@ const Navbar = ({isLeftSidebarOpen,
     setIsLeftSidebarOpen,
     isRightSidebarOpen,
     setIsRightSidebarOpen,
-    setActiveSection,}) => {
+    setActiveSection,
+    setCreatePost,
+  }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -90,6 +80,11 @@ const Navbar = ({isLeftSidebarOpen,
           onClick={() => {
             navigate("/home"), setActiveSection(null);
           }}
+        />
+        <PlusSquare
+         className="text-white hover:text-blue-600 cursor-pointer hover::scale-125"
+         size={24}
+         onClick={()=>setCreatePost(true)}
         />
         <Bell
           className="text-white hover:text-blue-600 cursor-pointer hover:scale-125"

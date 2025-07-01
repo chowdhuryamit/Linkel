@@ -1,0 +1,208 @@
+import React, { useState } from "react";
+import {
+  Image,
+  Video,
+  BarChart,
+  ChevronDown,
+  X,
+  SendHorizonal,
+  Plus,
+} from "lucide-react";
+import axios from "axios";
+import { toast } from "react-toastify";
+
+const CreatePost = ({ userData }) => {
+  const [isExpanded, setIsExpanded] = useState(false);
+  const [text, setText] = useState("");
+  const [media, setMedia] = useState(null);
+  const [mediaType, setMediaType] = useState(null);
+  const [postPrivacy, setPostPrivacy] = useState("public");
+
+  const handleMediaSelect = (type) => {
+    document.getElementById(`upload-${type}`).click();
+  };
+
+  const handleFileChange = (e, type) => {
+    const file = e.target.files[0];
+    if (file) {
+      setMedia(file);
+      setMediaType(type);
+    }
+  };
+
+  const removeMedia = () => {
+    setMedia(null);
+    setMediaType(null);
+  };
+
+  const handleCancel = () => {
+    setIsExpanded(false);
+    setText("");
+    setMedia(null);
+    setMediaType(null);
+  };
+
+  const handleSubmit = async () => {
+    const formData = new FormData();
+    formData.append("text", text);
+    formData.append("visibility", postPrivacy);
+    if (media) {
+      formData.append("media", media);
+      formData.append("type", mediaType);
+    }
+    try {
+      const res = await axios.post(
+        "http://localhost:8000/api/u2/create/post",
+        formData,
+        { withCredentials: true }
+      );
+      setIsExpanded(false);
+      setText("");
+      setMedia(null);
+      setMediaType(null);
+    } catch (error) {
+      toast.error(error.response.data.message);
+    }
+  };
+
+  return (
+    <div className="bg-white p-4 rounded-xl shadow-lg w-full max-w-2xl mx-auto transition-all duration-300">
+      {!isExpanded ? (
+        <button
+          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-full shadow-md mx-auto"
+          onClick={() => setIsExpanded(true)}
+        >
+          <Plus size={20} />
+          <span className="text-base font-medium">
+            Create Post as {userData.name}
+          </span>
+        </button>
+      ) : (
+        <>
+          {/* User Info */}
+          {userData && (
+            <div className="flex items-center gap-3 mb-4">
+              <img
+                src={userData.picture}
+                alt={userData.name}
+                className="w-10 h-10 rounded-full border-2 border-blue-500"
+                crossOrigin="anonymous"
+              />
+              <div>
+                <p className="font-semibold text-base">{userData.name}</p>
+                <p className="text-sm text-gray-500">@{userData.username}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Text Area */}
+          <textarea
+            placeholder="What's on your mind?"
+            className="w-full p-3 text-gray-700 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none mb-3"
+            rows="3"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+          ></textarea>
+
+          {/* Media Preview */}
+          {media && (
+            <div className="relative mb-4">
+              {mediaType === "image" ? (
+                <img
+                  src={URL.createObjectURL(media)}
+                  alt="preview"
+                  className="w-full rounded-md max-h-64 object-contain"
+                />
+              ) : (
+                <video
+                  controls
+                  src={URL.createObjectURL(media)}
+                  className="w-full rounded-md max-h-64"
+                />
+              )}
+              <button
+                onClick={removeMedia}
+                className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+                title="Remove"
+              >
+                <X size={18} />
+              </button>
+            </div>
+          )}
+
+          {/* Media buttons + Privacy */}
+          <div className="flex items-center justify-between flex-wrap gap-y-3">
+            <div className="flex gap-5 items-center">
+              <button
+                onClick={() => handleMediaSelect("image")}
+                className="flex items-center gap-1 text-gray-600 hover:text-blue-600"
+              >
+                <Image size={20} />
+                <span>Image</span>
+              </button>
+              <button
+                onClick={() => handleMediaSelect("video")}
+                className="flex items-center gap-1 text-gray-600 hover:text-blue-600"
+              >
+                <Video size={20} />
+                <span>Video</span>
+              </button>
+              <button className="flex items-center gap-1 text-gray-600 hover:text-blue-600">
+                <BarChart size={20} />
+                <span>Poll</span>
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <label htmlFor="visibility" className="text-gray-600"></label>
+              <select
+                id="visibility"
+                value={postPrivacy}
+                onChange={(e) => setPostPrivacy(e.target.value)}
+                className="bg-white text-gray-500 rounded-md"
+              >
+                <option value="Public">Public</option>
+                <option value="Private">Private</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Hidden file inputs */}
+          <input
+            type="file"
+            id="upload-image"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => handleFileChange(e, "image")}
+          />
+          <input
+            type="file"
+            id="upload-video"
+            accept="video/*"
+            className="hidden"
+            onChange={(e) => handleFileChange(e, "video")}
+          />
+
+          {/* Action Buttons */}
+          <div className="mt-5 flex justify-end gap-3">
+            <button
+              onClick={handleCancel}
+              className="px-4 py-2 rounded-full bg-gray-200 text-gray-800 hover:bg-gray-300 transition"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleSubmit}
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full shadow-md transition"
+            >
+              <SendHorizonal size={18} />
+              <span>Post</span>
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  );
+};
+
+export default CreatePost;

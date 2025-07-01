@@ -248,7 +248,7 @@ const updateUserProfile = async (req, res) => {
         return new Promise((resolve, reject) => {
           const stream = cloudinary.uploader.upload_stream(
             {
-              folder: "likel_profile_pics",
+              folder: "linkel_profile_pics",
             },
             (error, result) => {
               if (result) resolve(result);
