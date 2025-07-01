@@ -42,7 +42,7 @@ const Navbar = ({isLeftSidebarOpen,
   };
 
   return (
-    <nav className="bg-white rounded-xl shadow-sm p-4 flex items-center justify-between mb-4 flex-wrap gap-y-2 sticky top-0 z-10 md:z-30">
+    <nav className="bg-white rounded-xl shadow-sm p-4 flex items-center justify-between mb-4 flex-wrap gap-y-2 sticky top-0 z-10 md:z-30" style={{backgroundImage: "linear-gradient(to right, #eea2a2 0%, #bbc1bf 19%, #57c6e1 42%, #b49fda 79%, #7ac5d8 100%)"}}>
       {/* Left Section: Logo and Left Sidebar Toggle for mobile */}
       <div className="flex-shrink-0 flex items-center gap-3">
         {/* Left Sidebar Toggle (Mobile Only) */}
@@ -71,7 +71,7 @@ const Navbar = ({isLeftSidebarOpen,
       {/* Middle Section: Search bar - full width on mobile, centered and growing on larger screens */}
       <div className="relative w-full sm:w-auto flex-grow flex justify-center max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg mt-2 sm:mt-0 order-last sm:order-none">
         <Search
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-600"
+          className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-700"
           size={18}
         />
         <input
@@ -85,29 +85,29 @@ const Navbar = ({isLeftSidebarOpen,
       <div className="flex gap-4 sm:gap-6 items-center flex-wrap justify-center sm:justify-end">
         {/* Navigation icons, now visible on all screen sizes by removing 'hidden sm:block' */}
         <Home
-          className="text-gray-500 hover:text-blue-600 cursor-pointer hover:scale-125"
+          className="text-white hover:text-blue-600 cursor-pointer hover:scale-125"
           size={24}
           onClick={() => {
             navigate("/home"), setActiveSection(null);
           }}
         />
         <Bell
-          className="text-gray-500 hover:text-blue-600 cursor-pointer hover:scale-125"
+          className="text-white hover:text-blue-600 cursor-pointer hover:scale-125"
           size={24}
           onClick={() => setActiveSection("notifications")}
         />
         <MessageSquare
-          className="text-gray-500 hover:text-blue-600 cursor-pointer hover:scale-125"
+          className="text-white hover:text-blue-600 cursor-pointer hover:scale-125"
           size={24}
           onClick={() => setActiveSection("messages")}
         />
         <Bookmark
-          className="text-gray-500 hover:text-blue-600 cursor-pointer hover:scale-125"
+          className="text-white hover:text-blue-600 cursor-pointer hover:scale-125"
           size={24}
           onClick={() => setActiveSection("bookmarks")}
         />
         <LogOut
-          className="text-gray-500 hover:text-blue-600 cursor-pointer hover:scale-125"
+          className="text-white hover:text-blue-600 cursor-pointer hover:scale-125"
           size={24}
           onClick={handleLogout}
         />

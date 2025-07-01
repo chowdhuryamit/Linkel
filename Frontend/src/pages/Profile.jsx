@@ -18,94 +18,80 @@ const Profile = () => {
   const userData = useSelector((state) => state.authStatus.userData);
   const userStatus = useSelector((state) => state.authStatus.status);
 
-  // State to hold temporary edits before saving
   const [tempUserData, setTempUserData] = useState(userData);
 
-  // New state to manage account public/private status
-  // Assuming userData might have an 'isPublic' property, defaulting to true if not present
   const [isPublic, setIsPublic] = useState(userData?.public);
   
 
-  // New state for the selected profile picture file (File object)
   const [newProfilePic, setNewProfilePic] = useState(null);
 
-  // Handle input changes in edit mode
   const handleChange = (e) => {
     const { name, value } = e.target;
     if (name === "tags") {
-      // Convert comma-separated string to array for tags
       setTempUserData({
         ...tempUserData,
         [name]: value.split(",").map((tag) => tag.trim()),
       });
+      console.log(tempUserData);
+      
     } else {
       setTempUserData({ ...tempUserData, [name]: value });
     }
   };
 
-  // Save changes
   const handleSave = async () => {
     try {
       const formData = new FormData();
       formData.append('name',tempUserData.name);
       formData.append('username',tempUserData.username);
       formData.append('bio',tempUserData.bio);
-      formData.append('tags',tempUserData.tags);
+      formData.append('tags',JSON.stringify(tempUserData.tags));
       formData.append('public',tempUserData.public);
       formData.append('picture',newProfilePic);
 
       const res = await axios.patch('http://localhost:8000/api/u1/update/profile',formData,{withCredentials:true});
       
       if(res.data.success){
-        console.log(res.data.userData);
-        
         dispatch(login({userData:res.data.userData}));
         toast.success(res.data.message);
-        setIsEditing(false); // Exit edit mode
-        setNewProfilePic(null); // Clear the new profile pic state after saving
+        setIsEditing(false);
+        setNewProfilePic(null); 
       }
     } catch (error) {
       toast.error(error.response.data.message);
     }
   };
 
-  // Cancel edits
   const handleCancel = () => {
     setTempUserData(userData);
-    setIsPublic(userData?.public) // Revert tempUserData to original
-    setIsEditing(false); // Exit edit mode
-    setNewProfilePic(null); // Clear the new profile pic state
+    setIsPublic(userData?.public);
+    setIsEditing(false);
+    setNewProfilePic(null);
   };
 
-  // If user data or status is not available, show PageNotFound
   if (!userStatus || !userData) return <PageNotFound />;
 
   return (
     <div
       className="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8 font-sans"
       style={{
-        // A very subtle, clean blue-gray gradient background for a modern feel
         backgroundImage:
-          "linear-gradient(to top, #e0eafc 0%, #cfd9ed 100%)",
+        "linear-gradient(to top, #e8198b 0%, #c7eafd 100%)",
       }}
     >
       <div
         className="rounded-3xl shadow-2xl p-6 sm:p-8 w-full max-w-xl md:max-w-2xl lg:max-w-3xl transform transition-all duration-300 ease-in-out hover:scale-[1.01]"
         style={{
-          // A deep, sophisticated dark blue-gray gradient for the card
-          backgroundImage:
-            "linear-gradient(to right top, #1A2A3A, #2C4258)",
+          backgroundImage:"linear-gradient(to right, #243949 0%, #517fa4 100%)",
         }}
       >
-        {/* Header section with back button, privacy toggle, and edit icon */}
         <div className="flex justify-between items-center mb-6 sm:mb-8">
           <ChevronLeft
             className="text-gray-300 hover:text-cyan-400 hover:scale-110 transition-transform duration-200 cursor-pointer text-2xl sm:text-3xl"
-            onClick={() => navigate("/home")} // Navigate back to home
+            onClick={() => navigate("/home")}
           />
 
-          <div className="flex flex-col items-center space-x-0"> {/* Changed to flex-col to stack icon and text */}
-            {/* Toggle Privacy Button - always visible, but icons change */}
+          <div className="flex flex-col items-center space-x-0">
             {isEditing ?<><button
               onClick={() => setIsPublic(!isPublic)}
               className="text-gray-300 hover:text-purple-400 hover:scale-110 transition-transform duration-200 cursor-pointer focus:outline-none mb-1" // Added mb-1 for spacing
@@ -117,7 +103,6 @@ const Profile = () => {
                 <Lock className="text-2xl sm:text-3xl" /> // Icon for private
               )}
             </button>
-            {/* Text below the icon */}
             <p className="text-gray-300 text-xs sm:text-sm">
               {isPublic ? "Public Account" : "Private Account"}
             </p></>:<>
@@ -126,42 +111,38 @@ const Profile = () => {
               ) : (
                 <Lock className="text-2xl sm:text-3xl text-gray-300" /> // Icon for private
               )}
-            {/* Text below the icon */}
             <p className="text-gray-300 text-xs sm:text-sm">
               {isPublic ? "Public Account" : "Private Account"}
             </p></>}
           </div>
 
-          <div className="flex items-center space-x-4"> {/* Container for remaining buttons/placeholder */}
-            {/* Edit Button - shown only when not in editing mode */}
+          <div className="flex items-center space-x-4">
             {!isEditing && (
               <Pencil
                 className="text-gray-300 hover:text-emerald-400 hover:scale-110 transition-transform duration-200 cursor-pointer text-2xl sm:text-3xl"
                 onClick={() => {
-                  setIsEditing(true); // Enable edit mode
-                  setTempUserData(userData); // Initialize temp data with current user data
+                  setIsEditing(true);
+                  setTempUserData(userData);
                 }}
               />
             )}
-            {/* Placeholder to maintain layout when in editing mode (to prevent elements from shifting) */}
             {isEditing && <div className="w-6 h-6 sm:w-8 sm:h-8"></div>}
           </div>
         </div>
 
-        {/* Profile Information section */}
         <div className="flex flex-col items-center mb-6 sm:mb-8 text-center">
-          <div className="relative"> {/* Added relative positioning for the image and button */}
+          <div className="relative">
             <img
-              src={userData.picture} // Use tempUserData.picture for preview (could be original or new temp URL)
-              alt={userData.name} // Alt text for accessibility
+              src={newProfilePic ? URL.createObjectURL(newProfilePic) : userData.picture}
+              alt={userData.name}
               className="w-28 h-28 sm:w-36 sm:h-36 rounded-full object-cover border-4 border-cyan-400 shadow-xl mb-4 transform transition-transform duration-300 hover:scale-105"
             />
               <>
                 <input
                   type="file"
-                  id="profilePicUpload" // Unique ID for the input
-                  className="hidden" // Hide the default file input
-                  accept="image/*" // Accept only image files
+                  id="profilePicUpload"
+                  className="hidden"
+                  accept="image/*"
                   onChange={(e)=>setNewProfilePic(e.target.files[0])}
                 />
                 <label
@@ -169,13 +150,12 @@ const Profile = () => {
                   className="absolute bottom-6 right-0 bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full cursor-pointer shadow-lg transition-colors duration-200 transform hover:scale-110"
                   title="Change Profile Picture"
                 >
-                  <Camera className="text-lg sm:text-xl" /> {/* Camera icon */}
+                  <Camera className="text-lg sm:text-xl" />
                 </label>
               </>
           </div>
 
           {isEditing ? (
-            // Render editable input fields when in editing mode
             <>
               <input
                 type="text"
@@ -191,7 +171,7 @@ const Profile = () => {
                 value={tempUserData.username}
                 onChange={handleChange}
                 className="text-2xl sm:text-3xl font-extrabold text-white mb-2 text-center bg-gray-500 rounded-lg py-2 px-3 w-full max-w-sm focus:outline-none focus:ring-4 focus:ring-cyan-500 transition-colors duration-200 placeholder-gray-400"
-                placeholder="Your Username" // Changed placeholder to be more accurate
+                placeholder="Your Username"
               />
               <a
                 href={`mailto:${userData.email}`}
@@ -209,7 +189,6 @@ const Profile = () => {
               ></textarea>
             </>
           ) : (
-            // Render static profile information when not in editing mode
             <>
               <h1 className="text-3xl sm:text-4xl font-extrabold text-white mb-2">
                 {userData.name}
@@ -229,20 +208,18 @@ const Profile = () => {
             </>
           )}
 
-          {/* Tags/Skills section - displays as editable input or static tags */}
           {isEditing ? (
             <div className="w-full max-w-md mb-6">
               <input
                 type="text"
                 name="tags"
-                value={tempUserData.tags ? tempUserData.tags.join(", ") : ""} // Handle undefined tags
+                value={tempUserData.tags ? tempUserData.tags.join(",") : ""} // Handle undefined tags
                 onChange={handleChange}
                 placeholder="Add skills/interests, separated by commas"
                 className="bg-gray-500 text-gray-200 text-base sm:text-lg px-4 py-2 rounded-lg w-full focus:outline-none focus:ring-4 focus:ring-cyan-500 transition-colors duration-200 placeholder-gray-400"
               />
             </div>
           ) : (
-            // Only render tags if userData.tags exists and has items
             userData.tags &&
             userData.tags.length > 0 && (
               <div className="flex flex-wrap justify-center gap-3 mb-6">
@@ -258,7 +235,6 @@ const Profile = () => {
             )
           )}
 
-          {/* Action Buttons (Save/Cancel in edit mode) */}
           <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 w-full max-w-sm">
             {isEditing && (
               <>
@@ -279,11 +255,10 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* Stats Section (Posts, Followers, Following) */}
         <div className="grid grid-cols-3 gap-4 border-t border-b border-gray-700 py-4 sm:py-6 mb-6 sm:mb-8">
           <div className="text-center">
             <p className="text-xl sm:text-2xl font-bold text-white">
-              {userData.posts} {/* Assuming userData has a 'posts' property */}
+              {userData.posts}
             </p>
             <p className="text-gray-300 text-sm sm:text-base">Posts</p>
           </div>
@@ -301,7 +276,6 @@ const Profile = () => {
           </div>
         </div>
 
-        {/* Tabs for Posts and Saved content */}
         <div className="flex justify-around mb-6 sm:mb-8">
           <button
             className={`pb-2 px-4 font-medium text-base sm:text-lg relative group ${
@@ -325,12 +299,11 @@ const Profile = () => {
           </button>
         </div>
 
-        {/* Content Area (Placeholder for tab content) */}
         <div className="min-h-[200px] flex items-center justify-center bg-gray-800 rounded-xl p-4 text-gray-400 text-lg sm:text-xl shadow-inner">
           {activeTab === "posts" && (
             <p className="text-center">Your posts will appear here.</p>
           )}
-          {activeTab === "likes" && ( // 'likes' tab not present in UI, but logic is here
+          {activeTab === "likes" && (
             <p className="text-center">Content you liked will appear here.</p>
           )}
           {activeTab === "saved" && (

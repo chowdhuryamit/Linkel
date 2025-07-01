@@ -76,6 +76,7 @@ const userGoogleSignup = async (req, res) => {
             delete userData.password;
             delete userData.uid;
             delete userData.providerId;
+            
 
             return res.status(200).cookie("_at", accessToken, options).json({
               success: true,
@@ -148,6 +149,7 @@ const userGoogleSignin = async (req, res) => {
         delete userData.uid;
         delete userData.providerId;
         delete userData.password;
+        
         return res
           .status(200)
           .cookie("_at", accessToken, options)
@@ -226,17 +228,11 @@ const updateUserProfile = async (req, res) => {
         .json({ success: false, message: "user not authorized" });
     }
 
-    // if(!req.user._id.equals(userData._id)){
-    //   console.log(req.user._id);
-    //   console.log(userData._id);
-
-    //   return res.status(400).json({success:false,message:"you are not authorized"})
-    // }
-
     const url = req.user.picture;
+    const followers = await Follower.countDocuments({ following: req.user._id });
+    const following = await Follower.countDocuments({ follower: req.user._id });
 
     if (req.file) {
-      console.log(userData.picture);
       
       const lastIndexBackslash = url.lastIndexOf("/");
       const lastIndexDot = url.lastIndexOf(".");
@@ -275,7 +271,7 @@ const updateUserProfile = async (req, res) => {
         $set: {
           name: userData.name,
           bio: userData.bio,
-          tags: userData.tags,
+          tags: JSON.parse(userData.tags),
           username: userData.username,
           picture: result.secure_url,
           public: userData.public,
@@ -286,6 +282,8 @@ const updateUserProfile = async (req, res) => {
       delete userData.password;
       delete userData.uid;
       delete userData.providerId;
+      userData.followers = followers;
+      userData.following = following;
 
       return res.status(200).json({
         success: true,
@@ -298,7 +296,7 @@ const updateUserProfile = async (req, res) => {
         $set:{
           name:userData.name,
           bio:userData.bio,
-          tags:userData.tags,
+          tags:JSON.parse(userData.tags),
           username:userData.username,
           public:userData.public,
         }
@@ -307,6 +305,8 @@ const updateUserProfile = async (req, res) => {
       delete userData.password;
       delete userData.uid;
       delete userData.providerId;
+      userData.followers = followers;
+      userData.following = following;
 
       return res.status(200).json({
         success: true,
@@ -315,7 +315,6 @@ const updateUserProfile = async (req, res) => {
       });
     }
   } catch (error) {
-    console.log(error);
 
     return res.status(400).json({
       success: false,

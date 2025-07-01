@@ -52,7 +52,7 @@ const Homepage = () => {
   const navigate = useNavigate();
   const userStatus = useSelector((state) => state.authStatus.status);
   const userData = useSelector((state) => state.authStatus.userData);
-  console.log(userData)
+  console.log(userData);
 
   useEffect(() => {
     if (!userStatus || userData == null) {
@@ -97,6 +97,10 @@ const Homepage = () => {
           ${
             isLeftSidebarOpen ? "translate-x-0" : "-translate-x-full"
           } md:translate-x-0 md:col-span-3 lg:col-span-3 overflow-y-auto`}
+          style={{
+            backgroundImage:
+              "linear-gradient(to top, #a8edea 0%, #fed6e3 100%)",
+          }}
         >
           {/* Close button for mobile sidebar */}
           <div className="flex justify-end md:hidden mb-4">
@@ -113,22 +117,25 @@ const Homepage = () => {
               className="w-20 h-20 rounded-full mb-3 border-4 border-blue-500"
             />
             <h2 className="font-semibold text-lg">{userData.name}</h2>
-            <p className="text-gray-500 text-sm">{userData.username}</p>
+            <p className="text-gray-700 text-sm">@ {userData.username}</p>
             <div className="flex justify-around w-full mt-4 text-center">
               <div>
                 <p className="font-bold">250</p>
-                <p className="text-gray-500 text-xs">Post</p>
+                <p className="text-gray-600 text-xs">Post</p>
               </div>
               <div>
-                <p className="font-bold">2022</p>
-                <p className="text-gray-500 text-xs">Followers</p>
+                <p className="font-bold">{userData.followers}</p>
+                <p className="text-gray-600 text-xs">Followers</p>
               </div>
               <div>
-                <p className="font-bold">590</p>
-                <p className="text-gray-500 text-xs">Following</p>
+                <p className="font-bold">{userData.following}</p>
+                <p className="text-gray-600 text-xs">Following</p>
               </div>
             </div>
-            <button className="mt-5 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors w-full" onClick={()=>navigate('/profile')}>
+            <button
+              className="mt-5 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors w-full"
+              onClick={() => navigate("/profile")}
+            >
               My Profile
             </button>
           </div>
@@ -186,9 +193,9 @@ const Homepage = () => {
               <div className="bg-white rounded-xl shadow-sm p-4">
                 <div className="flex items-center gap-3 mb-4">
                   <img
-                    src="https://placehold.co/40x40/FFDDC1/1F2937?text=Y" // Your avatar placeholder
+                    src={userData.picture}
                     alt="Your Avatar"
-                    className="w-10 h-10 rounded-full border-2 border-gray-200"
+                    className="w-10 h-10 rounded-full border-2 border-blue-500"
                   />
                   <input
                     type="text"
@@ -202,6 +209,7 @@ const Homepage = () => {
                     <button className="flex items-center gap-1 text-gray-600 hover:text-blue-600">
                       <Image size={20} />
                       <span>Image</span>
+                      
                     </button>
                     <button className="flex items-center gap-1 text-gray-600 hover:text-blue-600">
                       <Video size={20} />
@@ -223,6 +231,10 @@ const Homepage = () => {
                 <div
                   key={post.id}
                   className="bg-white rounded-xl shadow-sm p-4"
+                  style={{
+                    backgroundImage:
+                      "linear-gradient(to top, #e6e9f0 0%, #eef1f5 100%)",
+                  }}
                 >
                   {/* Post Header */}
                   <div className="flex items-center justify-between mb-3">
@@ -259,17 +271,17 @@ const Homepage = () => {
                   />
 
                   {/* Post Engagement (Likes, Comments, Shares) */}
-                  <div className="flex items-center justify-between border-t border-b border-gray-100 py-3 mb-3">
-                    <div className="flex items-center gap-5">
-                      <button className="flex items-center gap-1 text-gray-600 hover:text-red-500">
+                  <div className="flex items-center justify-between border-t border-b py-3 mb-3">
+                    <div className="flex justify-between items-center w-full">
+                      <button className="flex-1 flex items-center justify-center gap-1 text-gray-600 hover:text-red-500">
                         <Heart size={20} />
                         <span className="text-sm">{post.likes}</span>
                       </button>
-                      <button className="flex items-center gap-1 text-gray-600 hover:text-blue-500">
+                      <button className="flex-1 flex items-center justify-center gap-1 text-gray-600 hover:text-blue-500">
                         <MessageCircle size={20} />
                         <span className="text-sm">{post.comments}</span>
                       </button>
-                      <button className="flex items-center gap-1 text-gray-600 hover:text-green-500">
+                      <button className="flex-1 flex items-center justify-center gap-1 text-gray-600 hover:text-green-500">
                         <Share2 size={20} />
                         <span className="text-sm">{post.shares}</span>
                       </button>
@@ -279,13 +291,13 @@ const Homepage = () => {
                   {/* Write a comment section */}
                   <div className="flex items-center gap-3">
                     <img
-                      src="https://placehold.co/30x30/FFDDC1/1F2937?text=Y" // Your avatar placeholder
+                      src={userData.picture}
                       alt="Your Avatar"
-                      className="w-8 h-8 rounded-full border-2 border-gray-200"
+                      className="w-8 h-8 rounded-full border-2 border-blue-500"
                     />
                     <input
                       type="text"
-                      placeholder="Write your comment"
+                      placeholder={`Comment as ${userData.name}`}
                       className="flex-grow py-2 px-4 bg-gray-50 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                     />
                   </div>
@@ -300,6 +312,10 @@ const Homepage = () => {
           ${
             isRightSidebarOpen ? "translate-x-0" : "translate-x-full"
           } md:translate-x-0 md:col-span-3 lg:col-span-3 overflow-y-auto`}
+          style={{
+            backgroundImage:
+              "linear-gradient(to top, #a8edea 0%, #fed6e3 100%)",
+          }}
         >
           {/* Close button for mobile sidebar */}
           <div className="flex justify-start md:hidden mb-4">
