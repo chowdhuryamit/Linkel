@@ -17,6 +17,7 @@ const CreatePost = ({ userData }) => {
   const [media, setMedia] = useState(null);
   const [mediaType, setMediaType] = useState(null);
   const [postPrivacy, setPostPrivacy] = useState("public");
+  const [loading, setLoading] = useState(false);
 
   const handleMediaSelect = (type) => {
     document.getElementById(`upload-${type}`).click();
@@ -40,15 +41,17 @@ const CreatePost = ({ userData }) => {
     setText("");
     setMedia(null);
     setMediaType(null);
+    setPostPrivacy("public");
   };
 
   const handleSubmit = async () => {
+    setLoading(true);
     const formData = new FormData();
     formData.append("text", text);
     formData.append("visibility", postPrivacy);
     if (media) {
       formData.append("media", media);
-      formData.append("type", mediaType);
+      //formData.append("type", mediaType);
     }
     try {
       const res = await axios.post(
@@ -56,12 +59,18 @@ const CreatePost = ({ userData }) => {
         formData,
         { withCredentials: true }
       );
-      setIsExpanded(false);
-      setText("");
-      setMedia(null);
-      setMediaType(null);
+      if (res.data.success) {
+        toast.success(res.data.message);
+        //setIsExpanded(false);
+        setText("");
+        setMedia(null);
+        setMediaType(null);
+        setPostPrivacy("public");
+      }
     } catch (error) {
       toast.error(error.response.data.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -193,10 +202,40 @@ const CreatePost = ({ userData }) => {
             </button>
             <button
               onClick={handleSubmit}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-full shadow-md transition"
+              disabled={loading}
+              className={`flex items-center gap-2 px-5 py-2 rounded-full shadow-md transition ${
+                loading
+                  ? "bg-blue-400 cursor-not-allowed"
+                  : "bg-blue-600 hover:bg-blue-700 text-white"
+              }`}
             >
-              <SendHorizonal size={18} />
-              <span>Post</span>
+              {loading ? (
+                <svg
+                  className="animate-spin h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+                  ></path>
+                </svg>
+              ) : (
+                <>
+                  <SendHorizonal size={18} />
+                  <span>Post</span>
+                </>
+              )}
             </button>
           </div>
         </>

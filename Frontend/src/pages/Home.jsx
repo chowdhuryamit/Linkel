@@ -19,6 +19,7 @@ import {
   BookmarkPage,
   Navbar,
   CreatePost,
+  FeedPosts
 } from "../components/index.js";
 import { useSelector } from "react-redux";
 
@@ -126,8 +127,8 @@ const Homepage = () => {
             <p className="text-gray-700 text-sm">@ {userData.username}</p>
             <div className="flex justify-around w-full mt-4 text-center">
               <div>
-                <p className="font-bold">250</p>
-                <p className="text-gray-600 text-xs">Post</p>
+                <p className="font-bold">{userData.posts}</p>
+                <p className="text-gray-600 text-xs">Posts</p>
               </div>
               <div>
                 <p className="font-bold">{userData.followers}</p>
@@ -174,7 +175,7 @@ const Homepage = () => {
           </div>
         </aside>
         {/* Main Content Feed - Scrolls independently within its grid area */}
-        <main className="col-span-1 md:col-span-6 lg:col-span-6 space-y-4 overflow-y-auto" ref={postRef}>
+        <main className="col-span-1 md:col-span-6 lg:col-span-6 space-y-4 overflow-y-auto feed-scroll-wrapper" ref={postRef}>
           {" "}
           {/* Added overflow-y-auto for main content scroll */}
           {activeSection === "notifications" && (
@@ -197,82 +198,7 @@ const Homepage = () => {
             <>
               <CreatePost userData={userData}/>
               {/* Post Feed - Iterates through the posts array to display each post */}
-              {posts.map((post) => (
-                <div
-                  key={post.id}
-                  className="bg-white rounded-xl shadow-sm p-4"
-                  style={{
-                    backgroundImage:
-                      "linear-gradient(to top, #e6e9f0 0%, #eef1f5 100%)",
-                  }}
-                >
-                  {/* Post Header */}
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <img
-                        src={post.userAvatar}
-                        alt={`${post.userName} Avatar`}
-                        className="w-10 h-10 rounded-full border-2 border-gray-200"
-                      />
-                      <div>
-                        <p className="font-semibold text-base">
-                          {post.userName}
-                        </p>
-                        <p className="text-gray-500 text-sm">{post.time}</p>
-                      </div>
-                    </div>
-                    <MoreHorizontal
-                      size={20}
-                      className="text-gray-500 cursor-pointer"
-                    />
-                  </div>
-
-                  {/* Post Content */}
-                  <p className="mb-3 text-gray-800">{post.text}</p>
-                  <img
-                    src={post.imageUrl}
-                    alt="Post Image"
-                    className="w-full h-auto rounded-lg mb-4 object-cover"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src =
-                        "https://placehold.co/600x400/D1D5DB/1F2937?text=Image+Load+Error";
-                    }} // Fallback for image loading errors
-                  />
-
-                  {/* Post Engagement (Likes, Comments, Shares) */}
-                  <div className="flex items-center justify-between border-t border-b py-3 mb-3">
-                    <div className="flex justify-between items-center w-full">
-                      <button className="flex-1 flex items-center justify-center gap-1 text-gray-600 hover:text-red-500">
-                        <Heart size={20} />
-                        <span className="text-sm">{post.likes}</span>
-                      </button>
-                      <button className="flex-1 flex items-center justify-center gap-1 text-gray-600 hover:text-blue-500">
-                        <MessageCircle size={20} />
-                        <span className="text-sm">{post.comments}</span>
-                      </button>
-                      <button className="flex-1 flex items-center justify-center gap-1 text-gray-600 hover:text-green-500">
-                        <Share2 size={20} />
-                        <span className="text-sm">{post.shares}</span>
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Write a comment section */}
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={userData.picture}
-                      alt="Your Avatar"
-                      className="w-8 h-8 rounded-full border-2 border-blue-500"
-                    />
-                    <input
-                      type="text"
-                      placeholder={`Comment as ${userData.name}`}
-                      className="flex-grow py-2 px-4 bg-gray-50 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
-                    />
-                  </div>
-                </div>
-              ))}
+              <FeedPosts userData={userData}/>
             </>
           )}
         </main>

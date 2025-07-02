@@ -13,6 +13,7 @@ import ChatRoom from "./ChatRoom";
 import BookmarkPage from "./BookmarkPage";
 import Navbar from "./Navbar";
 import CreatePost from "./CreatePost";
+import FeedPosts from "./FeedPosts";
 
 
 export{
@@ -30,5 +31,6 @@ export{
     ChatRoom,
     BookmarkPage,
     Navbar,
-    CreatePost
+    CreatePost,
+    FeedPosts
 }

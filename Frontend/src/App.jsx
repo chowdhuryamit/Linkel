@@ -5,7 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { fetchUserData } from "./service/fetchUser.js";
-
+import './App.css'
 
 const App = () => {
   const userStatus = useSelector((state) => state.authStatus.status);

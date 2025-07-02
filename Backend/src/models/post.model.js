@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const postSchemma = new mongoose.Schema({
     text:{
         type:String,
-        trim:true
+        trim:true,
     },
     picture:{
         type:String,
@@ -29,6 +29,10 @@ const postSchemma = new mongoose.Schema({
     owner:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"user"
+    },
+    fileType:{
+        type:String,
+        default:"none"
     }
 },{timestamps:true})
 

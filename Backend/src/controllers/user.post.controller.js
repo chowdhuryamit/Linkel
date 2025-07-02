@@ -13,6 +13,15 @@ cloudinary.config({
 });
 
 const createPost = async (req, res) => {
+  const uploadedData = req.body;
+  if (!uploadedData && !req.file) {
+    return res
+      .status(400)
+      .json({
+        success: false,
+        message: "Please provide either text or video or image to upload",
+      });
+  }
   try {
     if (!req.user) {
       return res
@@ -49,12 +58,139 @@ const createPost = async (req, res) => {
       }
       if (fileType.startsWith("video")) {
         const newPost = await Post.create({
-            
-        }) 
+          text: uploadedData.text,
+          video: result.secure_url,
+          owner: req.user._id,
+          visibility: uploadedData.visibility,
+          fileType: "video",
+        });
+
+        if (!newPost) {
+          return res
+            .status(400)
+            .json({
+              success: false,
+              message: "error occured while creating new post.try again",
+            });
+        }
+        return res
+          .status(200)
+          .json({ success: true, message: "post created successfully" });
+      } else {
+        const newPost = await Post.create({
+          text: uploadedData.text,
+          picture: result.secure_url,
+          owner: req.user._id,
+          visibility: uploadedData.visibility,
+          fileType: "picture",
+        });
+
+        if (!newPost) {
+          return res
+            .status(400)
+            .json({
+              success: false,
+              message: "error occured while creating new post.try again",
+            });
+        }
+        return res
+          .status(200)
+          .json({ success: true, message: "post created successfully" });
       }
+    } else {
+      const newPost = await Post.create({
+        text: uploadedData.text,
+        owner: req.user._id,
+        visibility: uploadedData.visibility,
+      });
+
+      if (!newPost) {
+        return res
+          .status(400)
+          .json({
+            success: false,
+            message: "error occured while creating new post.try again",
+          });
+      }
+      return res
+        .status(200)
+        .json({ success: true, message: "post created successfully" });
     }
-    
-  } catch (error) {}
+  } catch (error) {
+    return res
+      .status(400)
+      .json({
+        success: false,
+        message: "error occured while uploading post try again!!",
+      });
+  }
 };
 
-export { createPost };
+
+const getFeedPost = async (req,res) => {
+  if(!req.user){
+    return res.status(400).json({success:false,message:"unauthorized.please login to enjoy your feed"});
+  }
+  try {
+    const {page=1,limit=2}=req.query;
+    const parsedLimit = parseInt(limit,10);
+    const parsedPage = parseInt(page,10);
+    const pageSkip = (parseInt(parsedPage,10)-1)*parsedLimit;
+    const sortStage = {};
+    sortStage["createdAt"] = -1;
+
+    const posts = await Post.aggregate([
+      {
+        $match:{
+          visibility:'public'
+        }
+      },
+      {
+        $lookup:{
+          from:'users',
+          localField:'owner',
+          foreignField:'_id',
+          as:'owner',
+          pipeline:[
+            {
+              $project:{
+                name:1,
+                picture:1,
+                username:1
+              }
+            }
+          ]
+        }
+      },
+      {
+        $unwind:'$owner'
+      },
+      {
+        $sort:sortStage
+      },
+      {
+        $skip:pageSkip
+      },
+      {
+        $limit:parsedLimit
+      }
+    ])
+
+    const totalDocuments = await Post.countDocuments({
+      visibility:'public'
+    });
+    const totalPages = Math.ceil(totalDocuments/parsedLimit);
+    if(!posts || !totalDocuments){
+      return res.status(400).json({success:false,message:"no posts found"});
+    }
+    else{
+      return res.status(200).json({success:true,message:"posts fetched successfully",posts,haMore:parsedPage<totalPages});
+    }
+  } catch (error) {
+    console.log(error);
+    
+    return res.status(400).json({success:false,message:"error occured while fetching posts"});
+  }
+}
+
+export { createPost,getFeedPost };

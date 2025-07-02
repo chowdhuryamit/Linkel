@@ -4,6 +4,7 @@ import { Follower } from "../models/followers.model.js";
 import streamifier from "streamifier";
 import { v2 as cloudinary } from "cloudinary";
 import dotenv from "dotenv";
+import { Post } from "../models/post.model.js";
 
 dotenv.config();
 
@@ -63,16 +64,10 @@ const userGoogleSignup = async (req, res) => {
               sameSite: "lax",
             };
 
-            const followers = await Follower.countDocuments({
-              following: newUser._id,
-            });
-            const following = await Follower.countDocuments({
-              follower: newUser._id,
-            });
-
             const userData = newUser.toObject();
-            userData.followers = followers;
-            userData.following = following;
+            userData.followers = 0;
+            userData.following = 0;
+            userData.posts = 0;
             delete userData.password;
             delete userData.uid;
             delete userData.providerId;
@@ -142,10 +137,14 @@ const userGoogleSignin = async (req, res) => {
         const following = await Follower.countDocuments({
           follower: existingUser._id,
         });
+        const posts = await Post.countDocuments({
+          owner:existingUser._id
+        })
 
         const userData = existingUser.toObject();
         userData.followers = followers;
         userData.following = following;
+        userData.posts = posts;
         delete userData.uid;
         delete userData.providerId;
         delete userData.password;
@@ -176,10 +175,12 @@ const getUser = async (req, res) => {
 
   const followers = await Follower.countDocuments({ following: req.user._id });
   const following = await Follower.countDocuments({ follower: req.user._id });
+  const posts = await Post.countDocuments({owner:req.user._id});
 
   const userData = req.user.toObject();
   userData.followers = followers;
   userData.following = following;
+  userData.posts = posts;
 
   return res.status(200).json({
     success: true,
