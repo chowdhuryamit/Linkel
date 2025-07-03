@@ -1,13 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
+import { X } from "lucide-react";
 import {
-  MoreHorizontal,
-  Heart,
-  MessageCircle,
-  Share2,
-  X,
-} from "lucide-react";
-import {
-  posts,
   allActivities,
   allSuggestions,
   allShortcuts,
@@ -19,9 +12,12 @@ import {
   BookmarkPage,
   Navbar,
   CreatePost,
-  FeedPosts
+  FeedPosts,
 } from "../components/index.js";
 import { useSelector } from "react-redux";
+import { toast } from "react-toastify";
+import axios from "axios";
+import { fetchPosts } from "../service/fetchPosts.js";
 
 const Homepage = () => {
   //ui hooks
@@ -50,16 +46,27 @@ const Homepage = () => {
   const navigate = useNavigate();
   const userStatus = useSelector((state) => state.authStatus.status);
   const userData = useSelector((state) => state.authStatus.userData);
-  const [createPost,setCreatePost] = useState(false);
+  const [createPost, setCreatePost] = useState(false);
   const postRef = useRef(null);
+  //feed hooks
+  const [posts, setPosts] = useState([]);
+  const pageRef = useRef(1);
+  const loadingRef = useRef(false);
+  const [hasMore, setHasMore] = useState(true);
+  const limit = 3;
+ 
 
-  useEffect(()=>{
-    if(createPost){
-      postRef.current.scrollTo({top:0,behavior:"smooth"});
+  useEffect(() => {
+    fetchPosts({loadingRef,axios,pageRef,limit,setPosts,setHasMore});
+  }, []);
+
+  useEffect(() => {
+    if (createPost) {
+      postRef.current.scrollTo({ top: 0, behavior: "smooth" });
     }
-    setCreatePost(false)
-  },[createPost])
-  
+    setCreatePost(false);
+  }, [createPost]);
+
   useEffect(() => {
     if (!userStatus || userData == null) {
       navigate("/signup");
@@ -175,7 +182,11 @@ const Homepage = () => {
           </div>
         </aside>
         {/* Main Content Feed - Scrolls independently within its grid area */}
-        <main className="col-span-1 md:col-span-6 lg:col-span-6 space-y-4 overflow-y-auto feed-scroll-wrapper" ref={postRef}>
+        <main
+          className="col-span-1 md:col-span-6 lg:col-span-6 space-y-4 overflow-y-auto feed-scroll-wrapper"
+          id="scrollableDiv"
+          ref={postRef}
+        >
           {" "}
           {/* Added overflow-y-auto for main content scroll */}
           {activeSection === "notifications" && (
@@ -196,9 +207,14 @@ const Homepage = () => {
           {/* Only show post feed and share card if no specific section is active */}
           {!activeSection && (
             <>
-              <CreatePost userData={userData}/>
+              <CreatePost userData={userData} />
               {/* Post Feed - Iterates through the posts array to display each post */}
-              <FeedPosts userData={userData}/>
+              <FeedPosts
+                userData={userData}
+                posts={posts}
+                hasMore={hasMore}
+                fetchPosts={fetchPosts({loadingRef,axios,pageRef,limit,setPosts,setHasMore,toast})}
+              />
             </>
           )}
         </main>

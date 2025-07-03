@@ -232,6 +232,7 @@ const updateUserProfile = async (req, res) => {
     const url = req.user.picture;
     const followers = await Follower.countDocuments({ following: req.user._id });
     const following = await Follower.countDocuments({ follower: req.user._id });
+    const posts = await Post.countDocuments({owner:req.user._id});
 
     if (req.file) {
       
@@ -285,6 +286,7 @@ const updateUserProfile = async (req, res) => {
       delete userData.providerId;
       userData.followers = followers;
       userData.following = following;
+      userData.posts = posts;
 
       return res.status(200).json({
         success: true,
@@ -308,6 +310,7 @@ const updateUserProfile = async (req, res) => {
       delete userData.providerId;
       userData.followers = followers;
       userData.following = following;
+      userData.posts = posts;
 
       return res.status(200).json({
         success: true,

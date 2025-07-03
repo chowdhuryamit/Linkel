@@ -2,6 +2,8 @@ import streamifier from "streamifier";
 import { v2 as cloudinary } from "cloudinary";
 import dotenv from "dotenv";
 import { Post } from "../models/post.model.js";
+import { User } from "../models/user.model.js";
+import { Follower } from "../models/followers.model.js";
 
 dotenv.config();
 
@@ -15,12 +17,10 @@ cloudinary.config({
 const createPost = async (req, res) => {
   const uploadedData = req.body;
   if (!uploadedData && !req.file) {
-    return res
-      .status(400)
-      .json({
-        success: false,
-        message: "Please provide either text or video or image to upload",
-      });
+    return res.status(400).json({
+      success: false,
+      message: "Please provide either text or video or image to upload",
+    });
   }
   try {
     if (!req.user) {
@@ -66,12 +66,10 @@ const createPost = async (req, res) => {
         });
 
         if (!newPost) {
-          return res
-            .status(400)
-            .json({
-              success: false,
-              message: "error occured while creating new post.try again",
-            });
+          return res.status(400).json({
+            success: false,
+            message: "error occured while creating new post.try again",
+          });
         }
         return res
           .status(200)
@@ -86,12 +84,10 @@ const createPost = async (req, res) => {
         });
 
         if (!newPost) {
-          return res
-            .status(400)
-            .json({
-              success: false,
-              message: "error occured while creating new post.try again",
-            });
+          return res.status(400).json({
+            success: false,
+            message: "error occured while creating new post.try again",
+          });
         }
         return res
           .status(200)
@@ -105,92 +101,172 @@ const createPost = async (req, res) => {
       });
 
       if (!newPost) {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: "error occured while creating new post.try again",
-          });
+        return res.status(400).json({
+          success: false,
+          message: "error occured while creating new post.try again",
+        });
       }
       return res
         .status(200)
         .json({ success: true, message: "post created successfully" });
     }
   } catch (error) {
+    return res.status(400).json({
+      success: false,
+      message: "error occured while uploading post try again!!",
+    });
+  }
+};
+
+const getFeedPost = async (req, res) => {
+  if (!req.user) {
     return res
       .status(400)
       .json({
         success: false,
-        message: "error occured while uploading post try again!!",
+        message: "unauthorized.please login to enjoy your feed",
       });
   }
-};
-
-
-const getFeedPost = async (req,res) => {
-  if(!req.user){
-    return res.status(400).json({success:false,message:"unauthorized.please login to enjoy your feed"});
-  }
   try {
-    const {page=1,limit=2}=req.query;
-    const parsedLimit = parseInt(limit,10);
-    const parsedPage = parseInt(page,10);
-    const pageSkip = (parseInt(parsedPage,10)-1)*parsedLimit;
-    const sortStage = {};
-    sortStage["createdAt"] = -1;
+    const { page, limit = 2 } = req.query;
+    //console.log(page);
+    
+    const parsedLimit = parseInt(limit, 10);
+    const parsedPage = parseInt(page, 10);
+    const pageSkip = (parseInt(parsedPage, 10) - 1) * parsedLimit;
+    const sortStage = { createdAt: -1, _id: -1 };
 
     const posts = await Post.aggregate([
       {
-        $match:{
-          visibility:'public'
-        }
+        $match: {
+          visibility: "public",
+        },
       },
       {
-        $lookup:{
-          from:'users',
-          localField:'owner',
-          foreignField:'_id',
-          as:'owner',
-          pipeline:[
+        $lookup: {
+          from: "users",
+          localField: "owner",
+          foreignField: "_id",
+          as: "owner",
+          pipeline: [
             {
-              $project:{
-                name:1,
-                picture:1,
-                username:1
-              }
-            }
-          ]
-        }
+              $project: {
+                name: 1,
+                picture: 1,
+                username: 1,
+              },
+            },
+          ],
+        },
       },
       {
-        $unwind:'$owner'
+        $unwind: "$owner",
       },
       {
-        $sort:sortStage
+        $sort: sortStage,
       },
       {
-        $skip:pageSkip
+        $skip: pageSkip,
       },
       {
-        $limit:parsedLimit
-      }
-    ])
+        $limit: parsedLimit,
+      },
+    ]);
 
     const totalDocuments = await Post.countDocuments({
-      visibility:'public'
+      visibility: "public",
     });
-    const totalPages = Math.ceil(totalDocuments/parsedLimit);
-    if(!posts || !totalDocuments){
-      return res.status(400).json({success:false,message:"no posts found"});
-    }
-    else{
-      return res.status(200).json({success:true,message:"posts fetched successfully",posts,haMore:parsedPage<totalPages});
+    const totalPages = Math.ceil(totalDocuments / parsedLimit);
+    const hasMore = parsedPage < totalPages;
+
+    if (!posts || !totalDocuments) {
+      return res
+        .status(400)
+        .json({ success: false, message: "no posts found" });
+    } else {
+      return res
+        .status(200)
+        .json({
+          success: true,
+          message: "posts fetched successfully",
+          posts,
+          hasMore,
+        });
     }
   } catch (error) {
-    console.log(error);
-    
-    return res.status(400).json({success:false,message:"error occured while fetching posts"});
+    return res
+      .status(400)
+      .json({ success: false, message: "error occured while fetching posts" });
+  }
+};
+
+const savePost = async (req, res) => {
+  if (!req.user) {
+    return res
+      .status(400)
+      .json({ success: false, message: "you must be logged in to save post." });
+  }
+  try {
+    const { postId } = req.body;
+    const post = await Post.findById(postId);
+    if (!post) {
+      return res
+        .status(400)
+        .json({ success: false, message: "post not found." });
+    }
+    if (post.visibility === "private" || post.owner.equals(req.user._id)) {
+      return res
+        .status(400)
+        .json({ success: false, message: "post cant be saved." });
+    }
+    const pushedIntoArray = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        $addToSet: {
+          savedPosts: postId,
+        },
+      },
+      { new: true }
+    );
+    if (pushedIntoArray) {
+      return res
+        .status(200)
+        .json({ success: true, message: "post saved successfully" });
+    } else {
+      return res
+        .status(200)
+        .json({ success: false, message: "post not saved" });
+    }
+  } catch (error) {
+    return res
+      .status(400)
+      .json({ success: false, message: "error occured while saving post" });
+  }
+};
+
+const findFollowing = async (req,res) =>{
+  if(!req.user){
+    return res.status(400).json({success:false,message:'you are not authorized.'});
+  }
+  try {
+    const {userId} =req.query;
+    if(!userId){
+      return res.status(400).json({success:false,message:'post id is required.'});
+    }
+    const userexist = await User.findById(userId);
+    if(!userexist){
+      return res.status(400).json({success:false,message:'user does not exist.'});
+    }
+    const isFollow = await Follower.findOne({following:userId,follower:req.user._id});
+    if(isFollow){
+      return res.status(200).json({success:true,following:true});
+    }
+    else{
+      return res.status(200).json({success:true,following:false});
+    }
+  } catch (error) {
+    return res.status(400).json({success:false,message:'error occured while fetching following status.'});
   }
 }
 
-export { createPost,getFeedPost };
+export { createPost, getFeedPost, savePost,findFollowing };

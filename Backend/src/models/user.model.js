@@ -56,6 +56,10 @@ const userSchemma = new mongoose.Schema({
   public:{
     type:Boolean,
     default:false
+  },
+  savedPosts:{
+    type:[String],
+    default:[]
   }
 },{timestamps:true});
 

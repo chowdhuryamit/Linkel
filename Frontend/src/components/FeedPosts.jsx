@@ -2,33 +2,65 @@ import React, { useEffect, useState } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { toast } from "react-toastify";
 import axios from "axios";
-import {MoreHorizontal,Heart,MessageCircle,Share2} from 'lucide-react'
+import { MoreHorizontal, Heart, MessageCircle, Share2 } from "lucide-react";
+import { savePostFunction } from "../service/savePost.js";
 
-const FeedPosts = ({userData}) => {
-  const [posts, setPosts] = useState([]);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+const FeedPosts = ({ userData, posts, hasMore, fetchPosts }) => {
+  const [showDropDown, setShowDropDown] = useState(false);
+  const [activeDropDownPostId, setActiveDropDownPostId] = useState(null);
+  const [following, setFollowing] = useState(null);
+  const [ownerId, setOwnerId] = useState(null);
 
-  const fetchPosts = async () => {
+  useEffect(() => {
+    if (showDropDown && activeDropDownPostId && ownerId) {
+      (async () => {
+        try {
+          const res = await axios.get(
+            `http://localhost:8000/api/u2/get/follow/status?userId=${ownerId}`,
+            { withCredentials: true }
+          );
+          if (res.data.success) {
+            if (res.data.following) {
+              setFollowing(true);
+            } else {
+              setFollowing(false);
+            }
+          }
+        } catch (error) {
+          setFollowing(null);
+          toast.error(error.response.data.message);
+        }
+      })();
+    }
+  }, [activeDropDownPostId, ownerId]);
+
+  const followFunction = async () => {
     try {
-      const res = await axios.get(
-        `http://localhost:8000/api/u2/get/public/posts?page=${page}`,
-        { withCredentials: true }
-      );
-      if (res.data.success) {
-        setPosts((prev) => [...prev, ...res.data.posts]);
-        setHasMore(res.data.hasMore);
-        setPage((prev) => prev + 1);
+      const res = await axios.post('http://localhost:8000/api/u3/follow/user',{userId:ownerId},{ withCredentials: true });
+      if(res.data.success){
+        toast.success(res.data.message);
+        setShowDropDown(false);
+      }
+      else{
+        toast.warn(res.data.message);
       }
     } catch (error) {
       toast.error(error.response.data.message);
     }
   };
-
-  useEffect(() => {
-    fetchPosts();
-  }, []);
-
+  const unfollowFunction = async () => {
+    console.log("inside unfollow function");
+    
+    try {
+      const res = await axios.post('http://localhost:8000/api/u3/unfollow/user',{userId:ownerId},{ withCredentials: true });
+      if(res.data.success){
+        toast.success(res.data.message);
+        setShowDropDown(false);
+      }
+    } catch (error) {
+      toast.error(error.response.data.message);
+    }
+  };
   return (
     <>
       <InfiniteScroll
@@ -37,10 +69,11 @@ const FeedPosts = ({userData}) => {
         hasMore={hasMore}
         loader={<p className="text-center text-gray-400">Loading...</p>}
         endMessage={<p className="text-center text-gray-400">No more posts</p>}
+        scrollableTarget="scrollableDiv"
       >
         {posts.map((post) => (
           <div
-            key={post.id}
+            key={post._id}
             className="bg-white rounded-xl shadow-sm p-4 mb-3"
             style={{
               backgroundImage:
@@ -53,17 +86,85 @@ const FeedPosts = ({userData}) => {
                 <img
                   src={post.owner.picture}
                   alt={`${post.userName} Avatar`}
-                  className="w-10 h-10 rounded-full border-2 border-gray-200"
+                  className="w-10 h-10 rounded-full border-2 border-blue-600"
                 />
                 <div>
-                  <p className="font-semibold text-base">{post.owner.name}</p>
-                  <p className="text-gray-500 text-sm">{post.createdAt}</p>
+                  <p className="font-semibold text-base">
+                    {post.owner.name}
+                    <span className="text-sm text-gray-500 ml-1">
+                      @{post.owner.username}
+                    </span>
+                  </p>
+                  <p className="text-gray-500 text-sm">
+                    {new Date(post.createdAt).toLocaleString("en-IN", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                      hour: "numeric",
+                      minute: "2-digit",
+                      hour12: true,
+                    })}
+                  </p>
                 </div>
               </div>
-              <MoreHorizontal
-                size={20}
-                className="text-gray-500 cursor-pointer"
-              />
+              <div className="relative">
+                <MoreHorizontal
+                  size={20}
+                  className="text-gray-500 cursor-pointer"
+                  onClick={() => {
+                    setShowDropDown(!showDropDown),
+                      setActiveDropDownPostId(post._id);
+                    setOwnerId(post.owner._id);
+                  }}
+                />
+
+                {/* Dropdown Menu */}
+                {showDropDown && activeDropDownPostId === post._id && (
+                  <div className="absolute right-0 mt-2 w-40 bg-white border rounded-md shadow-md z-10">
+                    {post.owner._id === userData._id && (
+                      <>
+                        <button className="text-blue-500 font-semibold block w-full text-left px-4 py-2 text-sm hover:bg-gray-200">
+                          Edit
+                        </button>
+                        <button className="text-gray-600 font-semibold block w-full text-left px-4 py-2 text-sm hover:bg-gray-200">
+                          Delete
+                        </button>
+                      </>
+                    )}
+                    {post.owner._id !== userData._id && (
+                      <>
+                        {following && (
+                          <button
+                            className="text-pink-400 font-semibold block w-full text-left px-4 py-2 text-sm hover:bg-gray-200"
+                            onClick={() => unfollowFunction()}
+                          >
+                            Unfollow
+                          </button>
+                        )}
+                        {!following && (
+                          <button
+                            className="text-blue-600 font-semibold block w-full text-left px-4 py-2 text-sm hover:bg-gray-200"
+                            onClick={() => followFunction()}
+                          >
+                            Follow
+                          </button>
+                        )}
+                        <button
+                          className="text-green-600 font-semibold block w-full text-left px-4 py-2 text-sm hover:bg-gray-200"
+                          onClick={() =>
+                            savePostFunction(axios, post._id, toast)
+                          }
+                        >
+                          Save
+                        </button>
+                        <button className="text-red-500 font-semibold block w-full text-left px-4 py-2 text-sm hover:bg-gray-200">
+                          Report
+                        </button>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Post Content */}
@@ -76,12 +177,13 @@ const FeedPosts = ({userData}) => {
               />
             )}
             {post.fileType === "video" && (
-                <video src={post.video}
+              <video
+                src={post.video}
                 controls
                 playsInline
                 preload="metadata"
                 className="w-full h-auto rounded-lg mb-4 object-cover"
-                />
+              />
             )}
 
             {/* Post Engagement (Likes, Comments, Shares) */}

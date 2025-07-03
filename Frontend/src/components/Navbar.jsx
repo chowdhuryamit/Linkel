@@ -78,7 +78,7 @@ const Navbar = ({isLeftSidebarOpen,
           className="text-white hover:text-blue-600 cursor-pointer hover:scale-125"
           size={24}
           onClick={() => {
-            navigate("/home"), setActiveSection(null);
+            setActiveSection(null);
           }}
         />
         <PlusSquare
