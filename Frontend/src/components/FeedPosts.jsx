@@ -61,6 +61,7 @@ const FeedPosts = ({ userData, posts, hasMore, fetchPosts }) => {
       toast.error(error.response.data.message);
     }
   };
+
   return (
     <>
       <InfiniteScroll

@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import { Post } from "../models/post.model.js";
 import { User } from "../models/user.model.js";
 import { Follower } from "../models/followers.model.js";
+import mongoose from "mongoose";
 
 dotenv.config();
 
@@ -120,17 +121,15 @@ const createPost = async (req, res) => {
 
 const getFeedPost = async (req, res) => {
   if (!req.user) {
-    return res
-      .status(400)
-      .json({
-        success: false,
-        message: "unauthorized.please login to enjoy your feed",
-      });
+    return res.status(400).json({
+      success: false,
+      message: "unauthorized.please login to enjoy your feed",
+    });
   }
   try {
     const { page, limit = 2 } = req.query;
     //console.log(page);
-    
+
     const parsedLimit = parseInt(limit, 10);
     const parsedPage = parseInt(page, 10);
     const pageSkip = (parseInt(parsedPage, 10) - 1) * parsedLimit;
@@ -184,14 +183,12 @@ const getFeedPost = async (req, res) => {
         .status(400)
         .json({ success: false, message: "no posts found" });
     } else {
-      return res
-        .status(200)
-        .json({
-          success: true,
-          message: "posts fetched successfully",
-          posts,
-          hasMore,
-        });
+      return res.status(200).json({
+        success: true,
+        message: "posts fetched successfully",
+        posts,
+        hasMore,
+      });
     }
   } catch (error) {
     return res
@@ -244,29 +241,164 @@ const savePost = async (req, res) => {
   }
 };
 
-const findFollowing = async (req,res) =>{
-  if(!req.user){
-    return res.status(400).json({success:false,message:'you are not authorized.'});
+const findFollowing = async (req, res) => {
+  if (!req.user) {
+    return res
+      .status(400)
+      .json({ success: false, message: "you are not authorized." });
   }
   try {
-    const {userId} =req.query;
-    if(!userId){
-      return res.status(400).json({success:false,message:'post id is required.'});
+    const { userId } = req.query;
+    if (!userId) {
+      return res
+        .status(400)
+        .json({ success: false, message: "post id is required." });
     }
     const userexist = await User.findById(userId);
-    if(!userexist){
-      return res.status(400).json({success:false,message:'user does not exist.'});
+    if (!userexist) {
+      return res
+        .status(400)
+        .json({ success: false, message: "user does not exist." });
     }
-    const isFollow = await Follower.findOne({following:userId,follower:req.user._id});
-    if(isFollow){
-      return res.status(200).json({success:true,following:true});
-    }
-    else{
-      return res.status(200).json({success:true,following:false});
+    const isFollow = await Follower.findOne({
+      following: userId,
+      follower: req.user._id,
+    });
+    if (isFollow) {
+      return res.status(200).json({ success: true, following: true });
+    } else {
+      return res.status(200).json({ success: true, following: false });
     }
   } catch (error) {
-    return res.status(400).json({success:false,message:'error occured while fetching following status.'});
+    return res
+      .status(400)
+      .json({
+        success: false,
+        message: "error occured while fetching following status.",
+      });
+  }
+};
+
+const getSavedPost = async (req, res) => {
+  if (!req.user) {
+    return res
+      .status(400)
+      .json({ success: false, message: "you are not authorized." });
+  }
+  try {
+    const { page, limit = 2 } = req.query;
+
+    const parsedLimit = parseInt(limit, 10);
+    const parsedPage = parseInt(page, 10);
+    const pageSkip = (parseInt(parsedPage, 10) - 1) * parsedLimit;
+    const sortStage = { createdAt: -1, _id: -1 };
+    
+
+    const posts = await User.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(req.user._id),
+        },
+      },
+      {
+        $project:{
+          savedPosts:1
+        }
+      },
+      {
+        $lookup:{
+          from:'posts',
+          let:{savedPostIds:'$savedPosts'},
+          pipeline:[
+            {
+              $match:{
+                $expr:{
+                  $in:['$_id',{
+                    $map:{
+                      input:'$$savedPostIds',
+                      as:"id",
+                      in:{$toObjectId:'$$id'},
+                    }
+                  }]
+                }
+              }
+            },
+            {
+              $lookup:{
+                from:'users',
+                localField:'owner',
+                foreignField:'_id',
+                as:'owner',
+                pipeline:[
+                  {
+                    $project:{
+                      name:1,
+                      username:1,
+                      picture:1
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              $unwind:"$owner",
+            },
+            {
+              $sort:sortStage
+            },
+            {
+              $skip:pageSkip
+            },
+            {
+              $limit:parsedLimit
+            }
+          ],
+          as:'savedPosts'
+        }
+      }
+    ])
+    if(!posts){
+      return res.status(200).json({success:false,message:'No posts found'})
+    }
+    else{
+      const user = await User.findById(req.user._id).select("savedPosts")
+      const totalPages = Math.ceil((user?.savedPosts?.length||0) / parsedLimit);
+      const hasMore = parsedPage < totalPages;
+      
+      return res.status(200).json({success:true,message:'posts found',posts:posts[0]?.savedPosts,hasMore})
+    }
+    
+  } catch (error) {
+    
+    return res.status(400).json({success:false,message:error.message})
+  }
+};
+
+const removeSavedPost = async (req,res) =>{
+  if(!req.user){
+    return res.status(400).json({success:false,message:'Unauthorized.'})
+  }
+  try {
+    const {id} = req.query;
+    if(!id){
+      return res.status(400).json({success:false,message:'post Id is required.'})
+    }
+    
+
+    const user = await User.findByIdAndUpdate(req.user._id,{
+      $pull:{
+        savedPosts:id,
+      }
+    },{new:true})
+    if(!user){
+      return res.status(400).json({success:false,message:'Post not found.'})
+    }
+    else{
+      return res.status(200).json({success:true,message:'Post removed from your Bookmark.'})
+    }
+  } catch (error) {
+    return res.status(400).json({success:false,message:error.message});
   }
 }
 
-export { createPost, getFeedPost, savePost,findFollowing };
+export { createPost, getFeedPost, savePost, findFollowing, getSavedPost,removeSavedPost };

@@ -18,6 +18,7 @@ import { useSelector } from "react-redux";
 import { toast } from "react-toastify";
 import axios from "axios";
 import { fetchPosts } from "../service/fetchPosts.js";
+import { fetchSavedPosts } from "../service/fetchSavedPosts.js";
 
 const Homepage = () => {
   //ui hooks
@@ -41,6 +42,7 @@ const Homepage = () => {
     setIsLeftSidebarOpen(false);
     setIsRightSidebarOpen(false);
   };
+//console.log(activeSection);
 
   //my hooks
   const navigate = useNavigate();
@@ -48,17 +50,48 @@ const Homepage = () => {
   const userData = useSelector((state) => state.authStatus.userData);
   const [createPost, setCreatePost] = useState(false);
   const postRef = useRef(null);
+
   //feed hooks
   const [posts, setPosts] = useState([]);
   const pageRef = useRef(1);
   const loadingRef = useRef(false);
   const [hasMore, setHasMore] = useState(true);
   const limit = 3;
- 
+  
+  //saved post hooks
+  const [savedPost, setSavedPost] = useState([]);
+  const pageRefSavedPost = useRef(1);
+  const loadingRefSavedPost = useRef(false);
+  const [hasMoreSavedPost, setHasMoreSavedPost] = useState(true);
+  const limitSavedPost = 2;
 
   useEffect(() => {
-    fetchPosts({loadingRef,axios,pageRef,limit,setPosts,setHasMore});
+    fetchPosts({
+      loadingRef,
+      axios,
+      pageRef,
+      limit,
+      setPosts,
+      setHasMore,
+      toast,
+    });
   }, []);
+
+  useEffect(() => {
+    if (activeSection === "bookmarks" && savedPost.length <= 0) {
+      console.log(pageRefSavedPost);
+      
+      fetchSavedPosts({
+        loadingRefSavedPost,
+        axios,
+        pageRefSavedPost,
+        limitSavedPost,
+        setSavedPost,
+        setHasMoreSavedPost,
+        toast,
+      });
+    }
+  }, [activeSection]);
 
   useEffect(() => {
     if (createPost) {
@@ -200,8 +233,21 @@ const Homepage = () => {
             </div>
           )}
           {activeSection === "bookmarks" && (
-            <div className="bg-white rounded-xl shadow-sm p-4">
-              <BookmarkPage />
+            <div className="bg-white rounded-xl shadow-sm p-4" style={{backgroundImage: "linear-gradient(to top, #3f51b1 0%, #5a55ae 13%, #7b5fac 25%, #8f6aae 38%, #a86aa4 50%, #cc6b8e 62%, #f18271 75%, #f3a469 87%, #f7c978 100%)"}}>
+              <BookmarkPage
+                userData={userData}
+                savedPost={savedPost}
+                hasMoreSavedPost={hasMoreSavedPost}
+                fetchSavedPosts={()=>fetchSavedPosts({
+                  loadingRefSavedPost,
+                  axios,
+                  pageRefSavedPost,
+                  limitSavedPost,
+                  setSavedPost,
+                  setHasMoreSavedPost,
+                  toast,
+                })}
+              />
             </div>
           )}
           {/* Only show post feed and share card if no specific section is active */}
@@ -213,7 +259,15 @@ const Homepage = () => {
                 userData={userData}
                 posts={posts}
                 hasMore={hasMore}
-                fetchPosts={fetchPosts({loadingRef,axios,pageRef,limit,setPosts,setHasMore,toast})}
+                fetchPosts={()=>fetchPosts({
+                  loadingRef,
+                  axios,
+                  pageRef,
+                  limit,
+                  setPosts,
+                  setHasMore,
+                  toast,
+                })}
               />
             </>
           )}

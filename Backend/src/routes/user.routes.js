@@ -2,7 +2,7 @@ import { Router } from "express";
 import { userGoogleSignup,userGoogleSignin, getUser, userLogout, updateUserProfile} from "../controllers/user.auth.controller.js";
 import { verifyJWT } from "../middlewares/user.verify.middleware.js";
 import { upload } from "../middlewares/multer.js";
-import { createPost, findFollowing, getFeedPost, savePost } from "../controllers/user.post.controller.js";
+import { createPost, findFollowing, getFeedPost, getSavedPost, removeSavedPost, savePost } from "../controllers/user.post.controller.js";
 import { followUser, unfollowUser } from "../controllers/user.follow.controller.js";
 
 const router=Router();
@@ -18,5 +18,7 @@ router.patch('/save/post',verifyJWT,savePost);
 router.get('/get/follow/status',verifyJWT,findFollowing);
 router.post('/follow/user',verifyJWT,followUser);
 router.post('/unfollow/user',verifyJWT,unfollowUser);
+router.get('/get/user/savedPosts',verifyJWT,getSavedPost);
+router.delete('/remove/user/savedPost',verifyJWT,removeSavedPost)
 
 export default router
