@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useState } from "react";
 import { ChevronLeft, Pencil, Camera } from "lucide-react"; // Import Camera icon
 import { Globe, Lock } from "lucide-react";
@@ -6,23 +6,27 @@ import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { PageNotFound } from "./index.js";
 import axios from "axios";
-import {login,logout} from '../store/authSlice.js'
+import { login, addSavedPosts } from "../store/authSlice.js";
 import { toast } from "react-toastify";
+import { fetchUserPosts } from "../service/fetchUserPosts.js";
+import { fetchUserSavedPosts } from "../service/fetchUserSavedPosts.js";
+import { UserSavedPosts, UserPosts } from "../components/index.js";
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState("posts"); // State to manage active tab
   const [isEditing, setIsEditing] = useState(false); // State to toggle edit mode
   const navigate = useNavigate();
-  const dispatch  = useDispatch();
+  const dispatch = useDispatch();
 
   const userData = useSelector((state) => state.authStatus.userData);
   const userStatus = useSelector((state) => state.authStatus.status);
 
+  const userPosts = useSelector((state) => state.authStatus.userPosts);
+  const savedPosts = useSelector((state) => state.authStatus.savedPosts);
+  console.log(savedPosts);
+
   const [tempUserData, setTempUserData] = useState(userData);
-
   const [isPublic, setIsPublic] = useState(userData?.public);
-  
-
   const [newProfilePic, setNewProfilePic] = useState(null);
 
   const handleChange = (e) => {
@@ -33,7 +37,6 @@ const Profile = () => {
         [name]: value.split(",").map((tag) => tag.trim()),
       });
       console.log(tempUserData);
-      
     } else {
       setTempUserData({ ...tempUserData, [name]: value });
     }
@@ -42,20 +45,24 @@ const Profile = () => {
   const handleSave = async () => {
     try {
       const formData = new FormData();
-      formData.append('name',tempUserData.name);
-      formData.append('username',tempUserData.username);
-      formData.append('bio',tempUserData.bio);
-      formData.append('tags',JSON.stringify(tempUserData.tags));
-      formData.append('public',tempUserData.public);
-      formData.append('picture',newProfilePic);
+      formData.append("name", tempUserData.name);
+      formData.append("username", tempUserData.username);
+      formData.append("bio", tempUserData.bio);
+      formData.append("tags", JSON.stringify(tempUserData.tags));
+      formData.append("public", tempUserData.public);
+      formData.append("picture", newProfilePic);
 
-      const res = await axios.patch('http://localhost:8000/api/u1/update/profile',formData,{withCredentials:true});
-      
-      if(res.data.success){
-        dispatch(login({userData:res.data.userData}));
+      const res = await axios.patch(
+        "http://localhost:8000/api/u1/update/profile",
+        formData,
+        { withCredentials: true }
+      );
+
+      if (res.data.success) {
+        dispatch(login({ userData: res.data.userData }));
         toast.success(res.data.message);
         setIsEditing(false);
-        setNewProfilePic(null); 
+        setNewProfilePic(null);
       }
     } catch (error) {
       toast.error(error.response.data.message);
@@ -69,20 +76,29 @@ const Profile = () => {
     setNewProfilePic(null);
   };
 
+  useEffect(() => {
+    if (userData && userPosts.length <= 0 && activeTab == "posts") {
+      fetchUserPosts({ axios, userPosts, dispatch, toast });
+    }
+    if (userData && savedPosts.length <= 0 && activeTab == "saved") {
+      fetchUserSavedPosts({ axios, savedPosts, dispatch, toast });
+    }
+  }, [activeTab]);
+
   if (!userStatus || !userData) return <PageNotFound />;
 
   return (
     <div
       className="min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8 font-sans"
       style={{
-        backgroundImage:
-        "linear-gradient(to top, #e8198b 0%, #c7eafd 100%)",
+        backgroundImage: "linear-gradient(to top, #e8198b 0%, #c7eafd 100%)",
       }}
     >
       <div
         className="rounded-3xl shadow-2xl p-6 sm:p-8 w-full max-w-xl md:max-w-2xl lg:max-w-3xl transform transition-all duration-300 ease-in-out hover:scale-[1.01]"
         style={{
-          backgroundImage:"linear-gradient(to right, #243949 0%, #517fa4 100%)",
+          backgroundImage:
+            "linear-gradient(to right, #243949 0%, #517fa4 100%)",
         }}
       >
         <div className="flex justify-between items-center mb-6 sm:mb-8">
@@ -92,28 +108,37 @@ const Profile = () => {
           />
 
           <div className="flex flex-col items-center space-x-0">
-            {isEditing ?<><button
-              onClick={() => setIsPublic(!isPublic)}
-              className="text-gray-300 hover:text-purple-400 hover:scale-110 transition-transform duration-200 cursor-pointer focus:outline-none mb-1" // Added mb-1 for spacing
-              title={isPublic ? "Make Account Private" : "Make Account Public"}
-            >
-              {isPublic ? (
-                <Globe className="text-2xl sm:text-3xl" /> // Icon for public
-              ) : (
-                <Lock className="text-2xl sm:text-3xl" /> // Icon for private
-              )}
-            </button>
-            <p className="text-gray-300 text-xs sm:text-sm">
-              {isPublic ? "Public Account" : "Private Account"}
-            </p></>:<>
-              {isPublic ? (
-                <Globe className="text-2xl sm:text-3xl text-gray-300" /> // Icon for public
-              ) : (
-                <Lock className="text-2xl sm:text-3xl text-gray-300" /> // Icon for private
-              )}
-            <p className="text-gray-300 text-xs sm:text-sm">
-              {isPublic ? "Public Account" : "Private Account"}
-            </p></>}
+            {isEditing ? (
+              <>
+                <button
+                  onClick={() => setIsPublic(!isPublic)}
+                  className="text-gray-300 hover:text-purple-400 hover:scale-110 transition-transform duration-200 cursor-pointer focus:outline-none mb-1" // Added mb-1 for spacing
+                  title={
+                    isPublic ? "Make Account Private" : "Make Account Public"
+                  }
+                >
+                  {isPublic ? (
+                    <Globe className="text-2xl sm:text-3xl" /> // Icon for public
+                  ) : (
+                    <Lock className="text-2xl sm:text-3xl" /> // Icon for private
+                  )}
+                </button>
+                <p className="text-gray-300 text-xs sm:text-sm">
+                  {isPublic ? "Public Account" : "Private Account"}
+                </p>
+              </>
+            ) : (
+              <>
+                {isPublic ? (
+                  <Globe className="text-2xl sm:text-3xl text-gray-300" /> // Icon for public
+                ) : (
+                  <Lock className="text-2xl sm:text-3xl text-gray-300" /> // Icon for private
+                )}
+                <p className="text-gray-300 text-xs sm:text-sm">
+                  {isPublic ? "Public Account" : "Private Account"}
+                </p>
+              </>
+            )}
           </div>
 
           <div className="flex items-center space-x-4">
@@ -133,26 +158,30 @@ const Profile = () => {
         <div className="flex flex-col items-center mb-6 sm:mb-8 text-center">
           <div className="relative">
             <img
-              src={newProfilePic ? URL.createObjectURL(newProfilePic) : userData.picture}
+              src={
+                newProfilePic
+                  ? URL.createObjectURL(newProfilePic)
+                  : userData.picture
+              }
               alt={userData.name}
               className="w-28 h-28 sm:w-36 sm:h-36 rounded-full object-cover border-4 border-cyan-400 shadow-xl mb-4 transform transition-transform duration-300 hover:scale-105"
             />
-              <>
-                <input
-                  type="file"
-                  id="profilePicUpload"
-                  className="hidden"
-                  accept="image/*"
-                  onChange={(e)=>setNewProfilePic(e.target.files[0])}
-                />
-                <label
-                  htmlFor="profilePicUpload" // Link label to hidden input
-                  className="absolute bottom-6 right-0 bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full cursor-pointer shadow-lg transition-colors duration-200 transform hover:scale-110"
-                  title="Change Profile Picture"
-                >
-                  <Camera className="text-lg sm:text-xl" />
-                </label>
-              </>
+            <>
+              <input
+                type="file"
+                id="profilePicUpload"
+                className="hidden"
+                accept="image/*"
+                onChange={(e) => setNewProfilePic(e.target.files[0])}
+              />
+              <label
+                htmlFor="profilePicUpload" // Link label to hidden input
+                className="absolute bottom-6 right-0 bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full cursor-pointer shadow-lg transition-colors duration-200 transform hover:scale-110"
+                title="Change Profile Picture"
+              >
+                <Camera className="text-lg sm:text-xl" />
+              </label>
+            </>
           </div>
 
           {isEditing ? (
@@ -299,16 +328,20 @@ const Profile = () => {
           </button>
         </div>
 
-        <div className="min-h-[200px] flex items-center justify-center bg-gray-800 rounded-xl p-4 text-gray-400 text-lg sm:text-xl shadow-inner">
-          {activeTab === "posts" && (
-            <p className="text-center">Your posts will appear here.</p>
-          )}
-          {activeTab === "likes" && (
-            <p className="text-center">Content you liked will appear here.</p>
-          )}
-          {activeTab === "saved" && (
-            <p className="text-center">Saved content will appear here.</p>
-          )}
+        <div className="min-h-[200px] rounded-xl p-4 text-gray-400 text-lg sm:text-xl shadow-inner">
+          <UserPosts
+            axios={axios}
+            dispatch={dispatch}
+            toast={toast}
+            activeTab={activeTab}
+            userData={userData}
+          />
+          <UserSavedPosts
+            axios={axios}
+            dispatch={dispatch}
+            toast={toast}
+            activeTab={activeTab}
+          />
         </div>
       </div>
     </div>

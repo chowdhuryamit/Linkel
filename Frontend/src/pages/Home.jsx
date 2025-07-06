@@ -79,7 +79,7 @@ const Homepage = () => {
 
   useEffect(() => {
     if (activeSection === "bookmarks" && savedPost.length <= 0) {
-      console.log(pageRefSavedPost);
+      //console.log(pageRefSavedPost);
       
       fetchSavedPosts({
         loadingRefSavedPost,
@@ -99,7 +99,7 @@ const Homepage = () => {
     }
     setCreatePost(false);
   }, [createPost]);
-
+  
   useEffect(() => {
     if (!userStatus || userData == null) {
       navigate("/signup");

@@ -401,4 +401,118 @@ const removeSavedPost = async (req,res) =>{
   }
 }
 
-export { createPost, getFeedPost, savePost, findFollowing, getSavedPost,removeSavedPost };
+const getUserPosts = async (req,res) => {
+  try {
+    if(!req.user){
+      return res.status(400).json({success:false,message:'Unauthorized.'});
+    }
+    const {totalPosts} = req.query;
+    
+    const limit = parseInt(2);
+    const skip = parseInt(totalPosts);
+
+    const posts = await Post.find({owner:req.user._id}).sort({createdAt:-1}).skip(skip).limit(limit);
+    
+    if(!posts){
+      return res.status(200).json({success:false,message:'No posts found.'})
+    }
+    else if(posts.length<=0){
+      return res.status(200).json({success:false,message:'you dont have no more posts'})
+    }
+    else{
+      return res.status(200).json({success:true,message:'Posts found.',posts})
+    }
+  } catch (error) {
+    return res.status(200).json({success:false,message:error.message});
+  }
+}
+
+const getuserSavedPosts = async (req,res) => {
+  try {
+    if(!req.user){
+      return res.status(400).json({success:false,message:'Unauthorized.'});
+    }
+    const {totalPosts} = req.query;
+    const limit = parseInt(2);
+    const skip = parseInt(totalPosts);
+    const sortStage = { createdAt: -1, _id: -1 };
+
+    const posts = await User.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(req.user._id),
+        },
+      },
+      {
+        $project:{
+          savedPosts:1
+        }
+      },
+      {
+        $lookup:{
+          from:'posts',
+          let:{savedPostIds:'$savedPosts'},
+          pipeline:[
+            {
+              $match:{
+                $expr:{
+                  $in:['$_id',{
+                    $map:{
+                      input:'$$savedPostIds',
+                      as:"id",
+                      in:{$toObjectId:'$$id'},
+                    }
+                  }]
+                }
+              }
+            },
+            {
+              $lookup:{
+                from:'users',
+                localField:'owner',
+                foreignField:'_id',
+                as:'owner',
+                pipeline:[
+                  {
+                    $project:{
+                      name:1,
+                      username:1,
+                      picture:1
+                    }
+                  }
+                ]
+              }
+            },
+            {
+              $unwind:"$owner",
+            },
+            {
+              $sort:sortStage
+            },
+            {
+              $skip:skip
+            },
+            {
+              $limit:limit
+            }
+          ],
+          as:'savedPosts'
+        }
+      }
+    ])
+
+    if(!posts){
+      return res.status(200).json({success:false,message:'No posts found.'})
+    }
+    else if(posts[0]?.savedPosts.length<=0){
+      return res.status(200).json({success:false,message:'No more saved posts'})
+    }
+    else{
+      return res.status(200).json({success:true,message:'Posts found.',posts:posts[0]?.savedPosts})
+    }
+  } catch (error) {
+    return res.status(400).json({success:false,message:error.message});
+  }
+}
+
+export { createPost, getFeedPost, savePost, findFollowing, getSavedPost,removeSavedPost,getUserPosts,getuserSavedPosts };

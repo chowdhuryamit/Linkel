@@ -12,7 +12,7 @@ export const fetchSavedPosts = async ({
   loadingRefSavedPost.current = true;
   try {
     const res = await axios.get(
-      `http://localhost:8000/api/u2/get/user/savedPosts?page=${pageRefSavedPost.current}&limit=${limitSavedPost}`,
+      `http://localhost:8000/api/u3/get/user/savedPosts?page=${pageRefSavedPost.current}&limit=${limitSavedPost}`,
       { withCredentials: true }
     );
     //console.log(res);
@@ -21,7 +21,6 @@ export const fetchSavedPosts = async ({
       setSavedPost((prev) => [...prev, ...res.data.posts]);
       setHasMoreSavedPost(res.data.hasMore);
       pageRefSavedPost.current += 1;
-      console.log(pageRefSavedPost.current);
       
     }
     else{

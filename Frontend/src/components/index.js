@@ -14,6 +14,8 @@ import BookmarkPage from "./BookmarkPage";
 import Navbar from "./Navbar";
 import CreatePost from "./CreatePost";
 import FeedPosts from "./FeedPosts";
+import UserPosts from "./UserPosts";
+import UserSavedPosts from './UserSavedPosts'
 
 
 export{
@@ -32,5 +34,7 @@ export{
     BookmarkPage,
     Navbar,
     CreatePost,
-    FeedPosts
+    FeedPosts,
+    UserPosts,
+    UserSavedPosts
 }
