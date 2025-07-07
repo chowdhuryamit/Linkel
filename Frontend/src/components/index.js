@@ -15,7 +15,8 @@ import Navbar from "./Navbar";
 import CreatePost from "./CreatePost";
 import FeedPosts from "./FeedPosts";
 import UserPosts from "./UserPosts";
-import UserSavedPosts from './UserSavedPosts'
+import UserSavedPosts from './UserSavedPosts';
+import EditPost from "./EditPost";
 
 
 export{
@@ -36,5 +37,6 @@ export{
     CreatePost,
     FeedPosts,
     UserPosts,
-    UserSavedPosts
+    UserSavedPosts,
+    EditPost
 }

@@ -23,7 +23,6 @@ const Profile = () => {
 
   const userPosts = useSelector((state) => state.authStatus.userPosts);
   const savedPosts = useSelector((state) => state.authStatus.savedPosts);
-  console.log(savedPosts);
 
   const [tempUserData, setTempUserData] = useState(userData);
   const [isPublic, setIsPublic] = useState(userData?.public);

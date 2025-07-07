@@ -270,12 +270,10 @@ const findFollowing = async (req, res) => {
       return res.status(200).json({ success: true, following: false });
     }
   } catch (error) {
-    return res
-      .status(400)
-      .json({
-        success: false,
-        message: "error occured while fetching following status.",
-      });
+    return res.status(400).json({
+      success: false,
+      message: "error occured while fetching following status.",
+    });
   }
 };
 
@@ -292,7 +290,6 @@ const getSavedPost = async (req, res) => {
     const parsedPage = parseInt(page, 10);
     const pageSkip = (parseInt(parsedPage, 10) - 1) * parsedLimit;
     const sortStage = { createdAt: -1, _id: -1 };
-    
 
     const posts = await User.aggregate([
       {
@@ -301,138 +298,164 @@ const getSavedPost = async (req, res) => {
         },
       },
       {
-        $project:{
-          savedPosts:1
-        }
+        $project: {
+          savedPosts: 1,
+        },
       },
       {
-        $lookup:{
-          from:'posts',
-          let:{savedPostIds:'$savedPosts'},
-          pipeline:[
+        $lookup: {
+          from: "posts",
+          let: { savedPostIds: "$savedPosts" },
+          pipeline: [
             {
-              $match:{
-                $expr:{
-                  $in:['$_id',{
-                    $map:{
-                      input:'$$savedPostIds',
-                      as:"id",
-                      in:{$toObjectId:'$$id'},
-                    }
-                  }]
-                }
-              }
+              $match: {
+                $expr: {
+                  $in: [
+                    "$_id",
+                    {
+                      $map: {
+                        input: "$$savedPostIds",
+                        as: "id",
+                        in: { $toObjectId: "$$id" },
+                      },
+                    },
+                  ],
+                },
+              },
             },
             {
-              $lookup:{
-                from:'users',
-                localField:'owner',
-                foreignField:'_id',
-                as:'owner',
-                pipeline:[
+              $lookup: {
+                from: "users",
+                localField: "owner",
+                foreignField: "_id",
+                as: "owner",
+                pipeline: [
                   {
-                    $project:{
-                      name:1,
-                      username:1,
-                      picture:1
-                    }
-                  }
-                ]
-              }
+                    $project: {
+                      name: 1,
+                      username: 1,
+                      picture: 1,
+                    },
+                  },
+                ],
+              },
             },
             {
-              $unwind:"$owner",
+              $unwind: "$owner",
             },
             {
-              $sort:sortStage
+              $sort: sortStage,
             },
             {
-              $skip:pageSkip
+              $skip: pageSkip,
             },
             {
-              $limit:parsedLimit
-            }
+              $limit: parsedLimit,
+            },
           ],
-          as:'savedPosts'
-        }
-      }
-    ])
-    if(!posts){
-      return res.status(200).json({success:false,message:'No posts found'})
-    }
-    else{
-      const user = await User.findById(req.user._id).select("savedPosts")
-      const totalPages = Math.ceil((user?.savedPosts?.length||0) / parsedLimit);
+          as: "savedPosts",
+        },
+      },
+    ]);
+    if (!posts) {
+      return res
+        .status(200)
+        .json({ success: false, message: "No posts found" });
+    } else {
+      const user = await User.findById(req.user._id).select("savedPosts");
+      const totalPages = Math.ceil(
+        (user?.savedPosts?.length || 0) / parsedLimit
+      );
       const hasMore = parsedPage < totalPages;
-      
-      return res.status(200).json({success:true,message:'posts found',posts:posts[0]?.savedPosts,hasMore})
+
+      return res
+        .status(200)
+        .json({
+          success: true,
+          message: "posts found",
+          posts: posts[0]?.savedPosts,
+          hasMore,
+        });
     }
-    
   } catch (error) {
-    
-    return res.status(400).json({success:false,message:error.message})
+    return res.status(400).json({ success: false, message: error.message });
   }
 };
 
-const removeSavedPost = async (req,res) =>{
-  if(!req.user){
-    return res.status(400).json({success:false,message:'Unauthorized.'})
+const removeSavedPost = async (req, res) => {
+  if (!req.user) {
+    return res.status(400).json({ success: false, message: "Unauthorized." });
   }
   try {
-    const {id} = req.query;
-    if(!id){
-      return res.status(400).json({success:false,message:'post Id is required.'})
+    const { id } = req.query;
+    if (!id) {
+      return res
+        .status(400)
+        .json({ success: false, message: "post Id is required." });
     }
-    
 
-    const user = await User.findByIdAndUpdate(req.user._id,{
-      $pull:{
-        savedPosts:id,
-      }
-    },{new:true})
-    if(!user){
-      return res.status(400).json({success:false,message:'Post not found.'})
-    }
-    else{
-      return res.status(200).json({success:true,message:'Post removed from your Bookmark.'})
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      {
+        $pull: {
+          savedPosts: id,
+        },
+      },
+      { new: true }
+    );
+    if (!user) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Post not found." });
+    } else {
+      return res
+        .status(200)
+        .json({ success: true, message: "Post removed from your Bookmark." });
     }
   } catch (error) {
-    return res.status(400).json({success:false,message:error.message});
+    return res.status(400).json({ success: false, message: error.message });
   }
-}
+};
 
-const getUserPosts = async (req,res) => {
+const getUserPosts = async (req, res) => {
   try {
-    if(!req.user){
-      return res.status(400).json({success:false,message:'Unauthorized.'});
+    if (!req.user) {
+      return res.status(400).json({ success: false, message: "Unauthorized." });
     }
-    const {totalPosts} = req.query;
-    
+    const { totalPosts } = req.query;
+
     const limit = parseInt(2);
     const skip = parseInt(totalPosts);
 
-    const posts = await Post.find({owner:req.user._id}).sort({createdAt:-1}).skip(skip).limit(limit);
-    
-    if(!posts){
-      return res.status(200).json({success:false,message:'No posts found.'})
-    }
-    else if(posts.length<=0){
-      return res.status(200).json({success:false,message:'you dont have no more posts'})
-    }
-    else{
-      return res.status(200).json({success:true,message:'Posts found.',posts})
+    const posts = await Post.find({ owner: req.user._id })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    if (!posts) {
+      return res
+        .status(200)
+        .json({ success: false, message: "No posts found." });
+    } else if (posts.length <= 0) {
+      return res
+        .status(200)
+        .json({ success: false, message: "No more posts available" });
+    } else {
+      return res
+        .status(200)
+        .json({ success: true, message: "Posts found.", posts });
     }
   } catch (error) {
-    return res.status(200).json({success:false,message:error.message});
+    return res.status(200).json({ success: false, message: error.message });
   }
-}
+};
 
-const getuserSavedPosts = async (req,res) => {
+const getuserSavedPosts = async (req, res) => {
   try {
-    if(!req.user){
-      return res.status(400).json({success:false,message:'Unauthorized.'});
+    if (!req.user) {
+      return res.status(400).json({ success: false, message: "Unauthorized." });
     }
-    const {totalPosts} = req.query;
+    const { totalPosts } = req.query;
     const limit = parseInt(2);
     const skip = parseInt(totalPosts);
     const sortStage = { createdAt: -1, _id: -1 };
@@ -444,75 +467,263 @@ const getuserSavedPosts = async (req,res) => {
         },
       },
       {
-        $project:{
-          savedPosts:1
-        }
+        $project: {
+          savedPosts: 1,
+        },
       },
       {
-        $lookup:{
-          from:'posts',
-          let:{savedPostIds:'$savedPosts'},
-          pipeline:[
+        $lookup: {
+          from: "posts",
+          let: { savedPostIds: "$savedPosts" },
+          pipeline: [
             {
-              $match:{
-                $expr:{
-                  $in:['$_id',{
-                    $map:{
-                      input:'$$savedPostIds',
-                      as:"id",
-                      in:{$toObjectId:'$$id'},
-                    }
-                  }]
-                }
-              }
+              $match: {
+                $expr: {
+                  $in: [
+                    "$_id",
+                    {
+                      $map: {
+                        input: "$$savedPostIds",
+                        as: "id",
+                        in: { $toObjectId: "$$id" },
+                      },
+                    },
+                  ],
+                },
+              },
             },
             {
-              $lookup:{
-                from:'users',
-                localField:'owner',
-                foreignField:'_id',
-                as:'owner',
-                pipeline:[
+              $lookup: {
+                from: "users",
+                localField: "owner",
+                foreignField: "_id",
+                as: "owner",
+                pipeline: [
                   {
-                    $project:{
-                      name:1,
-                      username:1,
-                      picture:1
-                    }
-                  }
-                ]
-              }
+                    $project: {
+                      name: 1,
+                      username: 1,
+                      picture: 1,
+                    },
+                  },
+                ],
+              },
             },
             {
-              $unwind:"$owner",
+              $unwind: "$owner",
             },
             {
-              $sort:sortStage
+              $sort: sortStage,
             },
             {
-              $skip:skip
+              $skip: skip,
             },
             {
-              $limit:limit
-            }
+              $limit: limit,
+            },
           ],
-          as:'savedPosts'
+          as: "savedPosts",
+        },
+      },
+    ]);
+
+    if (!posts) {
+      return res
+        .status(200)
+        .json({ success: false, message: "No posts found." });
+    } else if (posts[0]?.savedPosts.length <= 0) {
+      return res
+        .status(200)
+        .json({ success: false, message: "No more saved posts" });
+    } else {
+      return res
+        .status(200)
+        .json({
+          success: true,
+          message: "Posts found.",
+          posts: posts[0]?.savedPosts,
+        });
+    }
+  } catch (error) {
+    return res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+const deleteUserPost = async (req, res) => {
+  try {
+    if (!req.user) {
+      return res.status(400).json({ success: false, message: "Unauthorized" });
+    }
+    const { id } = req.query;
+    if (!id) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Post id is required" });
+    }
+    const post = await Post.findOne({ _id: id, owner: req.user._id });
+    if (!post) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Post not found" });
+    } else {
+      let url='';
+      if (post.fileType === "picture") {
+        url = post.picture;
+      }
+      if(post.fileType === 'video'){
+        url = post.video;
+      }
+      if(url){
+        const lastIndexBackslash = url.lastIndexOf("/");
+        const lastIndexDot = url.lastIndexOf(".");
+        const public_id = `linkel_posts_assets/${url.substring(
+          lastIndexBackslash + 1,
+          lastIndexDot
+        )}`;
+        if (public_id) {
+          await cloudinary.uploader.destroy(public_id,{
+            resource_type:post.fileType ==='video' ?'video':'image'
+          });
+        }
+        await post.deleteOne();
+        return res.status(200).json({success:true,message:'post deleted successfully'});
+      }
+      else{
+        await post.deleteOne();
+        return res.status(200).json({success:true,message:'post deleted successfully'});
+      }
+    }
+  } catch (error) {
+    return res.status(400).json({ success: false, message: error.message });
+  }
+};
+
+const editUserPost = async (req,res) =>{
+  try {
+    const uploadedData = req.body;
+    if(!uploadedData && !req.file){
+      return res.status(400).json({success:false,message:'Please provide either text or video or image to upload'});
+    }
+    if(!req.user){
+      return res.status(400).json({success:false,message:'Please login to edit post'});
+    }
+    const postOwner = uploadedData.owner;
+    const postId = uploadedData.postId;
+    if(!postId && !postOwner){
+      return res.status(400).json({success:false,message:'Please provide post id or owner id'});
+    }
+    const post = await Post.findOne({owner:postOwner,_id:postId});
+    if(!post){
+      return res.status(400).json({success:false,message:'Post not found'});
+    }
+    if(!post.owner.equals(req.user._id)){
+      return res.status(400).json({success:false,message:'you are not authorized to edit this post'});
+    }
+    let result = "";
+    let fileType ="";
+    if(req.file){
+      let url ="";
+      if(post.fileType === "picture"){
+        url = post.picture;
+      }
+      if(post.fileType === 'video'){
+        url = post.video;
+      }
+      if(url){
+        const lastIndexBackslash = url.lastIndexOf("/");
+        const lastIndexDot = url.lastIndexOf(".");
+        const public_id = `linkel_posts_assets/${url.substring(
+          lastIndexBackslash + 1,
+          lastIndexDot
+        )}`;
+        if (public_id) {
+          await cloudinary.uploader.destroy(public_id,{
+            resource_type:post.fileType ==='video' ?'video':'image'
+          });
         }
       }
-    ])
+      const streamUpload = (buffer, mimetype) => {
+        return new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            {
+              folder: "linkel_posts_assets",
+              resource_type: mimetype.startsWith("video") ? "video" : "image",
+            },
+            (error, result) => {
+              if (result) resolve(result);
+              else reject(error);
+            }
+          );
+          streamifier.createReadStream(buffer).pipe(stream);
+        });
+      };
+      fileType =req.file.mimetype;
+      result = await streamUpload(req.file.buffer,fileType);
+      if(!result){
+        return res.status(400).json({success:false,message:'Failed to upload file'});
+      }
+      if(fileType.startsWith("video")){
+        const updatedPost = await Post.findByIdAndUpdate(post._id,{
+          $set:{
+            video:result.secure_url,
+            fileType:"video",
+            text:uploadedData.text,
+            visibility:uploadedData.visibility,
 
-    if(!posts){
-      return res.status(200).json({success:false,message:'No posts found.'})
-    }
-    else if(posts[0]?.savedPosts.length<=0){
-      return res.status(200).json({success:false,message:'No more saved posts'})
+          }
+        },{new:true})
+        if(updatedPost){
+          return res.status(200).json({success:true,message:'Post updated successfully'});
+        }
+        else{
+          return res.status(400).json({success:false,message:'Failed to update post.try Again'});
+        }
+      }
+      else{
+        const updatedPost = await Post.findByIdAndUpdate(post._id,{
+          $set:{
+            picture:result.secure_url,
+            fileType:"picture",
+            text:uploadedData.text,
+            visibility:uploadedData.visibility,
+          }
+        },{new:true});
+        if(updatedPost){
+          return res.status(200).json({success:true,message:'Post updated successfully'});
+        }
+        else{
+          return res.status(400).json({success:false,message:'Failed to update post.try Again'});
+        }
+      }
     }
     else{
-      return res.status(200).json({success:true,message:'Posts found.',posts:posts[0]?.savedPosts})
+      const updatedPost = await Post.findByIdAndUpdate(post._id,{
+        $set:{
+          text:uploadedData.text,
+          visibility:uploadedData.visibility,
+        }
+      },{new:true});
+      if(updatedPost){
+        return res.status(200).json({success:true,message:'Post updated successfully'});
+      }
+      else{
+        return res.status(400).json({success:false,message:'Failed to update post.try Again'});
+      }
     }
   } catch (error) {
     return res.status(400).json({success:false,message:error.message});
   }
 }
 
-export { createPost, getFeedPost, savePost, findFollowing, getSavedPost,removeSavedPost,getUserPosts,getuserSavedPosts };
+export {
+  createPost,
+  getFeedPost,
+  savePost,
+  findFollowing,
+  getSavedPost,
+  removeSavedPost,
+  getUserPosts,
+  getuserSavedPosts,
+  deleteUserPost,
+  editUserPost
+};

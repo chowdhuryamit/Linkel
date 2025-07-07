@@ -7,6 +7,20 @@ import {fetchUserSavedPosts} from '../service/fetchUserSavedPosts'
 
 const UserPosts = ({axios,dispatch,toast,activeTab}) => {
     const savedPosts = useSelector((state) => state.authStatus.savedPosts);
+
+    const handleRemoveBookmark = async (id) => {
+      try {
+        const Id = id.toString();
+        
+        const res = await axios.delete( `http://localhost:8000/api/u3/remove/user/savedPost?id=${Id}`,{withCredentials:true});
+        if(res.data.success){
+          toast.success(res.data.message);
+        }
+      } catch (error) {
+        toast.error(error.response.data.message)
+      }
+    };
+    
   return (
     <>
       {activeTab === "saved" && savedPosts.length <= 0 && (
@@ -76,7 +90,7 @@ const UserPosts = ({axios,dispatch,toast,activeTab}) => {
                     <span className="text-sm">{userpost.shares}</span>
                   </div>
                 </div>
-                <button className="mt-4 w-full bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 shadow-sm hover:shadow-md">
+                <button onClick={()=>handleRemoveBookmark(userpost._id)} className="mt-4 w-full bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 shadow-sm hover:shadow-md">
                   Remove post
                 </button>
               </div>

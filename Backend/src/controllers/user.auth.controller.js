@@ -238,7 +238,7 @@ const updateUserProfile = async (req, res) => {
       
       const lastIndexBackslash = url.lastIndexOf("/");
       const lastIndexDot = url.lastIndexOf(".");
-      const public_id = `likel_profile_pics/${url.substring(
+      const public_id = `linkel_profile_pics/${url.substring(
         lastIndexBackslash + 1,
         lastIndexDot
       )}`;
