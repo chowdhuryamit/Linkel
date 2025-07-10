@@ -60,8 +60,8 @@ const userGoogleSignup = async (req, res) => {
           } else {
             const options = {
               httpOnly: true,
-              secure: process.env.NODE_ENV === "production",
-              sameSite: "lax",
+              secure: true,
+              sameSite: "none",
             };
 
             const userData = newUser.toObject();
@@ -127,8 +127,8 @@ const userGoogleSignin = async (req, res) => {
         }
         const options = {
           httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
+          secure: true,
+          sameSite: "none",
         };
 
         const followers = await Follower.countDocuments({
@@ -198,8 +198,8 @@ const userLogout = async (req, res) => {
 
   const options = {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    secure: true,
+    sameSite: "none",
   };
 
   return res
