@@ -19,7 +19,7 @@ function Signup() {
         const result = await signInWithPopup(auth, provider);
         const idToken = await result.user.getIdToken();
         const res = await axios.post(
-          "http://localhost:8000/api/u1/verify/signup/credentials",
+          `${import.meta.env.VITE_BASE_URL}/api/u1/verify/signup/credentials`,
           { idToken },
           { withCredentials: true }
         );
@@ -35,7 +35,7 @@ function Signup() {
       else{
         const result = await signInWithPopup(auth,provider);
         const idToken = await result.user.getIdToken();
-        const res = await axios.post("http://localhost:8000/api/u1/verify/signin/credentails",
+        const res = await axios.post(`${import.meta.env.VITE_BASE_URL}/api/u1/verify/signin/credentails`,
           {idToken,displayName:result.user.displayName,email:result.user.email,uid:result.user.uid,providerId:result.providerId},
           {withCredentials:true}
         );

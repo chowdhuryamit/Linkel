@@ -3,7 +3,7 @@ import { login,logout } from "../store/authSlice.js";
 export const fetchUserData = async (dispatch,navigate,axios,toast) => {
   try {
     const res = await axios.get(
-      "http://localhost:8000/api/u1/verify/user/credentials",
+      `${import.meta.env.VITE_BASE_URL}/api/u1/verify/user/credentials`,
       { withCredentials: true }
     );
     if (res.data.success) {

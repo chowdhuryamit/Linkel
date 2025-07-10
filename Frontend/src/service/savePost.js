@@ -1,7 +1,7 @@
 
 export const savePostFunction = async (axios,postId,toast) => {
     try {
-        const res = await axios.patch("http://localhost:8000/api/u2/save/post",{postId},{withCredentials:true});
+        const res = await axios.patch(`${import.meta.env.VITE_BASE_URL}/api/u2/save/post`,{postId},{withCredentials:true});
         if(res.data.success){
             toast.success(res.data.message);
         }

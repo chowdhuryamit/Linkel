@@ -40,7 +40,7 @@ const EditPost = ({ post, onClose }) => {
     }
     try {
       const res = await axios.patch(
-        "http://localhost:8000/api/u3/update/user/post",
+        `${import.meta.env.VITE_BASE_URL}/api/u3/update/user/post`,
         formData,
         { withCredentials: true }
       );

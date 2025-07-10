@@ -18,7 +18,7 @@ const FeedPosts = ({ userData, posts, hasMore, fetchPosts }) => {
       (async () => {
         try {
           const res = await axios.get(
-            `http://localhost:8000/api/u2/get/follow/status?userId=${ownerId}`,
+            `${import.meta.env.VITE_BASE_URL}/api/u2/get/follow/status?userId=${ownerId}`,
             { withCredentials: true }
           );
           if (res.data.success) {
@@ -39,7 +39,7 @@ const FeedPosts = ({ userData, posts, hasMore, fetchPosts }) => {
   const followFunction = async () => {
     try {
       const res = await axios.post(
-        "http://localhost:8000/api/u3/follow/user",
+        `${import.meta.env.VITE_BASE_URL}/api/u3/follow/user`,
         { userId: ownerId },
         { withCredentials: true }
       );
@@ -58,7 +58,7 @@ const FeedPosts = ({ userData, posts, hasMore, fetchPosts }) => {
 
     try {
       const res = await axios.post(
-        "http://localhost:8000/api/u3/unfollow/user",
+        `${import.meta.env.VITE_BASE_URL}/api/u3/unfollow/user`,
         { userId: ownerId },
         { withCredentials: true }
       );

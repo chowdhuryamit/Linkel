@@ -52,7 +52,7 @@ const Profile = () => {
       formData.append("picture", newProfilePic);
 
       const res = await axios.patch(
-        "http://localhost:8000/api/u1/update/profile",
+        `${import.meta.env.VITE_BASE_URL}/api/u1/update/profile`,
         formData,
         { withCredentials: true }
       );

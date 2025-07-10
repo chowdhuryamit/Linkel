@@ -3,7 +3,7 @@ import {addSavedPosts} from '../store/authSlice.js'
 export const fetchUserSavedPosts = async ({axios,savedPosts,dispatch,toast}) => {
     try {
       const res = await axios.get(
-        `http://localhost:8000/api/u3/get/user/saved/posts?totalPosts=${savedPosts.length}`,
+        `${import.meta.env.VITE_BASE_URL}/api/u3/get/user/saved/posts?totalPosts=${savedPosts.length}`,
         { withCredentials: true }
       );
       if (res.data.success) {

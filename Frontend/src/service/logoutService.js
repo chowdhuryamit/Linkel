@@ -3,7 +3,7 @@ import { logout } from "../store/authSlice.js";
 export const logoutFunction = async (dispatch, navigate,toast,axios) => {
   try {
     const res = await axios.post(
-      "http://localhost:8000/api/u1/erase/user/credentials",
+      `${import.meta.env.VITE_BASE_URL}/api/u1/erase/user/credentials`,
       {},
       { withCredentials: true }
     );

@@ -12,7 +12,7 @@ export const fetchSavedPosts = async ({
   loadingRefSavedPost.current = true;
   try {
     const res = await axios.get(
-      `http://localhost:8000/api/u3/get/user/savedPosts?page=${pageRefSavedPost.current}&limit=${limitSavedPost}`,
+      `${import.meta.env.VITE_BASE_URL}/api/u3/get/user/savedPosts?page=${pageRefSavedPost.current}&limit=${limitSavedPost}`,
       { withCredentials: true }
     );
     //console.log(res);

@@ -15,7 +15,7 @@ const BookmarkPage = ({
     try {
       const Id = id.toString();
       
-      const res = await axios.delete( `http://localhost:8000/api/u3/remove/user/savedPost?id=${Id}`,{withCredentials:true});
+      const res = await axios.delete( `${import.meta.env.VITE_BASE_URL}/api/u3/remove/user/savedPost?id=${Id}`,{withCredentials:true});
       if(res.data.success){
         toast.success(res.data.message);
       }

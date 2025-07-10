@@ -55,7 +55,7 @@ const CreatePost = ({ userData }) => {
     }
     try {
       const res = await axios.post(
-        "http://localhost:8000/api/u2/create/post",
+        `${import.meta.env.VITE_BASE_URL}/api/u2/create/post`,
         formData,
         { withCredentials: true }
       );
