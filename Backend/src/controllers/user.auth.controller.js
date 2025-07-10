@@ -61,7 +61,7 @@ const userGoogleSignup = async (req, res) => {
             const options = {
               httpOnly: true,
               secure: true,
-              sameSite: "none",
+              sameSite: "None",
             };
 
             const userData = newUser.toObject();
@@ -128,7 +128,7 @@ const userGoogleSignin = async (req, res) => {
         const options = {
           httpOnly: true,
           secure: true,
-          sameSite: "none",
+          sameSite: "None",
         };
 
         const followers = await Follower.countDocuments({
@@ -199,7 +199,7 @@ const userLogout = async (req, res) => {
   const options = {
     httpOnly: true,
     secure: true,
-    sameSite: "none",
+    sameSite: "None",
   };
 
   return res
