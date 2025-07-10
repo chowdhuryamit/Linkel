@@ -40,6 +40,8 @@ function Signup() {
           {withCredentials:true}
         );
         if (res.data.success) {
+          console.log(res);
+          
           dispatch(login({userData:res.data.userData}));
           toast.success(res.data.message,{
             onClose:()=>{
