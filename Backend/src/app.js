@@ -6,7 +6,7 @@ import cookieParser from 'cookie-parser'
 const app=express();
 
 app.use(cors({
-   origin:"http://localhost:5173",
+   origin:"https://linkelfrontend.onrender.com",
    credentials: true ,
    exposedHeaders: ["Set-Cookie"],
 }));
