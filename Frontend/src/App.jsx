@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
-import { toast, ToastContainer,Zoom } from "react-toastify";
+import { toast, ToastContainer,Slide } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
@@ -31,7 +31,7 @@ const App = () => {
         draggable
         pauseOnHover
         theme="colored"
-        transition={Zoom}
+        transition={Slide}
       />
       <Outlet />
     </>
