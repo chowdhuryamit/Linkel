@@ -80,7 +80,49 @@ const unfollowUser = async (req,res) =>{
     }
   }
 
+const getUserProfile = async (req,res) =>{
+  try {
+    if(!req.user){
+      return res.status(400).json({success:false,message:'you are not authorized.please login'});
+    }
+    const {userId} = req.query;
+    if(!userId){
+      return res.status(400).json({success:false,message:'user id is required'});
+    }
+    if(userId.equals(req.user._id)){
+      return res.status(200).json({success:false,message:'this is your account'});
+    }
+    const userExist = await User.findById(userId).select("-password -email -uid -gender -dob -providerId -savedPosts");
+    if(!userExist){
+      return res.status(400).json({success:false,message:'user does not exist'});
+    }
+    if(!userExist.public){
+      return res.status(200).json({success:false,userData:null,message:'This account is private'});
+    }
+
+    const followers = await Follower.countDocuments({
+      following: existingUser._id,
+    });
+    const following = await Follower.countDocuments({
+      follower: existingUser._id,
+    });
+    const posts = await Post.countDocuments({
+      owner:existingUser._id
+    })
+
+    const userData = userExist.toObject();
+    userData.followers = followers;
+    userData.following = following;
+    userData.posts = posts;
+
+    return res.status(200).json({success:true,userData,message:'user data fetched successfully'});
+  } catch (error) {
+    return res.status(400).json({success:false,message:error.message})
+  }
+}
+
 export{
     followUser,
-    unfollowUser
+    unfollowUser,
+    getUserProfile
 }

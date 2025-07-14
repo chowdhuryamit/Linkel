@@ -3,7 +3,7 @@ import { userGoogleSignup,userGoogleSignin, getUser, userLogout, updateUserProfi
 import { verifyJWT } from "../middlewares/user.verify.middleware.js";
 import { upload } from "../middlewares/multer.js";
 import { createPost, deleteUserPost, editUserPost, findFollowing, getFeedPost, getSavedPost, getUserPosts, getuserSavedPosts, removeSavedPost, savePost } from "../controllers/user.post.controller.js";
-import { followUser, unfollowUser } from "../controllers/user.follow.controller.js";
+import { followUser, getUserProfile, unfollowUser } from "../controllers/user.follow.controller.js";
 
 const router=Router();
 
@@ -24,5 +24,6 @@ router.get('/get/user/posts',verifyJWT,getUserPosts);
 router.get('/get/user/saved/posts',verifyJWT,getuserSavedPosts);
 router.delete('/delete/user/post',verifyJWT,deleteUserPost);
 router.patch('/update/user/post',verifyJWT,upload.single('media'),editUserPost);
+router.get('/user/profile',verifyJWT,getUserProfile)
 
 export default router

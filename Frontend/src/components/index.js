@@ -17,6 +17,7 @@ import FeedPosts from "./FeedPosts";
 import UserPosts from "./UserPosts";
 import UserSavedPosts from './UserSavedPosts';
 import EditPost from "./EditPost";
+import UserProfile from "./UserProfile";
 
 
 export{
@@ -38,5 +39,6 @@ export{
     FeedPosts,
     UserPosts,
     UserSavedPosts,
-    EditPost
+    EditPost,
+    UserProfile
 }

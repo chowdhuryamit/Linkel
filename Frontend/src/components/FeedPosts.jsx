@@ -5,7 +5,7 @@ import axios from "axios";
 import { MoreHorizontal, Heart, MessageCircle, Share2 } from "lucide-react";
 import { savePostFunction } from "../service/savePost.js";
 import { handleDeletePost } from "../service/deletePost.js";
-import { EditPost } from "../components/index.js";
+import { EditPost,UserProfile } from "../components/index.js";
 
 const FeedPosts = ({ userData, posts, hasMore, fetchPosts }) => {
   const [showDropDown, setShowDropDown] = useState(false);
@@ -73,7 +73,12 @@ const FeedPosts = ({ userData, posts, hasMore, fetchPosts }) => {
 
   //post edit hooks
   const [editingPostId, setEditingPostId] = useState(null);
-
+  //user Profile hooks
+  const [userId,setUserId] = useState(null);
+  const [postId,setPostId] = useState(null);
+  
+  
+  
   const handleEditClick = (post) => {
     setEditingPostId(post._id);
     setShowDropDown(false);
@@ -81,10 +86,17 @@ const FeedPosts = ({ userData, posts, hasMore, fetchPosts }) => {
   const handleEditClose = () => {
     setEditingPostId(null);
   };
+  const handleUserProfileClose=()=>{
+    setUserId(null);
+    setPostId(null);
+  }
 
   return (
     <>
       {editingPostId && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-filter backdrop-blur-sm z-40"></div>
+      )}
+      {userId && postId && userId!==userData._id && (
         <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-filter backdrop-blur-sm z-40"></div>
       )}
       <InfiniteScroll
@@ -106,14 +118,20 @@ const FeedPosts = ({ userData, posts, hasMore, fetchPosts }) => {
           >
             {/* Edit Modal above post */}
             {editingPostId === post._id && userData._id===post.owner._id && (
-              <div className="absolute inset-0 flex items-center justify-center z-50">
+              <div className="absolute inset-0 flex items-center justify-center z-50" >
                 <EditPost
                   post={post}
                   onClose={handleEditClose}
                 />
               </div>
             )}
-
+            {userId && userId!==userData._id && postId===post._id && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+              <div className="bg-white max-h-[90vh] overflow-y-auto rounded-xl shadow-lg w-full max-w-4xl p-4">
+                <UserProfile onClose={handleUserProfileClose} userId={userId}/>
+              </div>
+            </div>
+            )}
             {/* Normal Post UI */}
             {/* Post Header */}
             <div className={`${editingPostId === post._id ? "opacity-0" : ""}`}>
@@ -122,6 +140,7 @@ const FeedPosts = ({ userData, posts, hasMore, fetchPosts }) => {
                   <img
                     src={post.owner.picture}
                     alt={`${post.userName} Avatar`}
+                    onClick={()=>{setUserId(post.owner._id),setPostId(post._id)}}
                     className="w-10 h-10 rounded-full border-2 border-blue-600"
                   />
                   <div>
