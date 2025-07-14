@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import { Post } from "../models/post.model.js";
 import { User } from "../models/user.model.js";
 import { Follower } from "../models/followers.model.js";
+import mongoose from "mongoose";
 
 dotenv.config();
 
@@ -89,7 +90,7 @@ const getUserProfile = async (req,res) =>{
     if(!userId){
       return res.status(400).json({success:false,message:'user id is required'});
     }
-    if(userId.equals(req.user._id)){
+    if(new mongoose.Types.ObjectId(userId).equals(req.user._id)){
       return res.status(200).json({success:false,message:'this is your account'});
     }
     const userExist = await User.findById(userId).select("-password -email -uid -gender -dob -providerId -savedPosts");
@@ -101,13 +102,13 @@ const getUserProfile = async (req,res) =>{
     }
 
     const followers = await Follower.countDocuments({
-      following: existingUser._id,
+      following: userExist._id,
     });
     const following = await Follower.countDocuments({
-      follower: existingUser._id,
+      follower: userExist._id,
     });
     const posts = await Post.countDocuments({
-      owner:existingUser._id
+      owner:userExist._id
     })
 
     const userData = userExist.toObject();

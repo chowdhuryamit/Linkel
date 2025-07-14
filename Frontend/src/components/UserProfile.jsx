@@ -90,7 +90,7 @@ const UserProfile = ({ onClose, userId}) => {
 
   useEffect(()=>{
     try {
-        const res= axios.get(`http://localhost:8000/api/u2/user/profile?userId=${userId}`,{withCredentials:true});
+        const res= axios.get(`${import.meta.env.VITE_BASE_URL}/api/u2/user/profile?userId=${userId}`,{withCredentials:true});
         console.log(res);
         
     } catch (error) {
