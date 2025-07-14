@@ -127,7 +127,7 @@ const FeedPosts = ({ userData, posts, hasMore, fetchPosts }) => {
             )}
             {userId && userId!==userData._id && postId===post._id && (
               <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-              <div className="bg-white max-h-[90vh] overflow-y-auto rounded-xl shadow-lg w-full max-w-4xl p-4">
+              <div className="max-h-[90vh] overflow-y-auto rounded-xl shadow-lg w-full max-w-4xl p-4">
                 <UserProfile onClose={handleUserProfileClose} userId={userId}/>
               </div>
             </div>

@@ -1,5 +1,4 @@
-import React, { useEffect } from "react";
-import { useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { ChevronLeft, Pencil, Camera } from "lucide-react"; // Import Camera icon
 import { Globe, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
@@ -11,6 +10,7 @@ import { toast } from "react-toastify";
 import { fetchUserPosts } from "../service/fetchUserPosts.js";
 import { fetchUserSavedPosts } from "../service/fetchUserSavedPosts.js";
 import { UserSavedPosts, UserPosts } from "../components/index.js";
+import { Chart, registerables } from "chart.js";
 
 const Profile = () => {
   const [activeTab, setActiveTab] = useState("posts"); // State to manage active tab
@@ -83,6 +83,106 @@ const Profile = () => {
       fetchUserSavedPosts({ axios, savedPosts, dispatch, toast });
     }
   }, [activeTab]);
+
+  // Ref for the chart canvas element
+  const chartRef = useRef(null);
+  // Ref for the Chart.js instance
+  const chartInstance = useRef(null);
+  // Sample data for the chart
+  const engagementData = {
+    labels: [`Followers ( ${userData?userData.followers:0} )`, `Following ( ${userData?userData.following:0} )`, `Posts ( ${userData?userData.posts:0} )`],
+    datasets: [
+      {
+        label: "Engagement Metrics",
+        data: [
+          userData ? userData.followers : 0,
+          userData ? userData.following : 0,
+          userData ? userData.posts : 0,
+        ], // Sample data
+        backgroundColor: ["#58cc5c", "#54c0e8", "#edd86f"], // Slate-700, Slate-600, Slate-400
+        borderColor: "#ffffff",
+        borderWidth: 1,
+        borderRadius: 8,
+      },
+    ],
+  };
+  // Chart options for responsiveness and styling
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false, // Crucial for respecting container dimensions
+    plugins: {
+      legend: {
+        display: false,
+      },
+      tooltip: {
+        callbacks: {
+          title: function (context) {
+            // Wrap title if it's too long
+            const label = context[0].label;
+            return label.length > 16
+              ? label.match(/.{1,16}/g).join("\n")
+              : label;
+          },
+        },
+        titleFont: {
+          size: 14,
+          weight: "bold",
+        },
+        bodyFont: {
+          size: 12,
+        },
+        padding: 10,
+        cornerRadius: 6,
+        displayColors: true,
+        boxPadding: 4,
+      },
+    },
+    scales: {
+      x: {
+        grid: {
+          display: false,
+        },
+        ticks: {
+          color: "#ffffff", // slate-600
+          font: {
+            size: 12,
+            weight: "500",
+          },
+        },
+      },
+      y: {
+        beginAtZero: true,
+        grid: {
+          color: "#ffffff", // slate-200
+        },
+        ticks: {
+          color: "#ffffff", // slate-600
+          font: {
+            size: 18,
+          },
+        },
+      },
+    },
+  };
+
+  useEffect(() => {
+    if (chartRef.current) {
+      if (chartInstance.current) {
+        chartInstance.current.destroy();
+      }
+
+      chartInstance.current = new Chart(chartRef.current, {
+        type: "bar",
+        data: engagementData,
+        options: chartOptions,
+      });
+    }
+    return () => {
+      if (chartInstance.current) {
+        chartInstance.current.destroy();
+      }
+    };
+  }, [engagementData]);
 
   if (!userStatus || !userData) return <PageNotFound />;
 
@@ -283,25 +383,8 @@ const Profile = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 gap-4 border-t border-b border-gray-700 py-4 sm:py-6 mb-6 sm:mb-8">
-          <div className="text-center">
-            <p className="text-xl sm:text-2xl font-bold text-white">
-              {userData.posts}
-            </p>
-            <p className="text-gray-300 text-sm sm:text-base">Posts</p>
-          </div>
-          <div className="text-center">
-            <p className="text-xl sm:text-2xl font-bold text-white">
-              {userData.followers}
-            </p>
-            <p className="text-gray-300 text-sm sm:text-base">Followers</p>
-          </div>
-          <div className="text-center">
-            <p className="text-xl sm:text-2xl font-bold text-white">
-              {userData.following}
-            </p>
-            <p className="text-gray-300 text-sm sm:text-base">Following</p>
-          </div>
+        <div className="p-4 rounded-lg shadow-inner h-[300px] sm:h-[360px] mb-4">
+          <canvas ref={chartRef} id="engagementChart"></canvas>
         </div>
 
         <div className="flex justify-around mb-6 sm:mb-8">

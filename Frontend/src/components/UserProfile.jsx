@@ -3,32 +3,34 @@ import { useState, useRef, useEffect } from "react";
 import { Chart, registerables } from "chart.js";
 import { Image, Video, BarChart, X, SendHorizonal } from "lucide-react";
 import axios from "axios";
+import { getUserProfile } from "../service/getUserProfile";
 
 Chart.register(...registerables);
 
 const UserProfile = ({ onClose, userId}) => {
   const [isFollowing, setIsFollowing] = useState(false);
+  const [userData,setUserData] = useState(null);
+  const [message,setMessage] = useState(null);
+  
 
   // Ref for the chart canvas element
   const chartRef = useRef(null);
   // Ref for the Chart.js instance
   const chartInstance = useRef(null);
-
   // Sample data for the chart
   const engagementData = {
     labels: ["Followers", "Following", "Posts"],
     datasets: [
       {
         label: "Engagement Metrics",
-        data: [1250, 300, 85], // Sample data
-        backgroundColor: ["#475569", "#64748b", "#94a3b8"], // Slate-700, Slate-600, Slate-400
+        data: [userData?userData.followers:0, userData?userData.following:0, userData?userData.posts:0], // Sample data
+        backgroundColor: ["#58cc5c", "#54c0e8", "#edd86f"], // Slate-700, Slate-600, Slate-400
         borderColor: "#ffffff",
         borderWidth: 1,
         borderRadius: 8,
       },
     ],
   };
-
   // Chart options for responsiveness and styling
   const chartOptions = {
     responsive: true,
@@ -66,7 +68,7 @@ const UserProfile = ({ onClose, userId}) => {
           display: false,
         },
         ticks: {
-          color: "#475569", // slate-600
+          color: "#ffffff", // slate-600
           font: {
             size: 12,
             weight: "500",
@@ -76,12 +78,12 @@ const UserProfile = ({ onClose, userId}) => {
       y: {
         beginAtZero: true,
         grid: {
-          color: "#e2e8f0", // slate-200
+          color: "#ffffff", // slate-200
         },
         ticks: {
-          color: "#475569", // slate-600
+          color: "#ffffff", // slate-600
           font: {
-            size: 12,
+            size: 18,
           },
         },
       },
@@ -89,40 +91,28 @@ const UserProfile = ({ onClose, userId}) => {
   };
 
   useEffect(()=>{
-    try {
-        const res= axios.get(`${import.meta.env.VITE_BASE_URL}/api/u2/user/profile?userId=${userId}`,{withCredentials:true});
-        console.log(res);
-        
-    } catch (error) {
-        
-    }
+    getUserProfile({axios,userId,setUserData,setMessage});
   },[userId])
 
-  // Effect hook to initialize and update the chart
   useEffect(() => {
     if (chartRef.current) {
-      // Destroy existing chart instance if it exists
       if (chartInstance.current) {
         chartInstance.current.destroy();
       }
 
-      // Create new chart instance
       chartInstance.current = new Chart(chartRef.current, {
         type: "bar",
         data: engagementData,
         options: chartOptions,
       });
     }
-
-    // Cleanup function to destroy chart on component unmount
     return () => {
       if (chartInstance.current) {
         chartInstance.current.destroy();
       }
     };
-  }, [engagementData]); // Added engagementData to dependency array for dynamic updates
+  }, [engagementData]);
 
-  // Handler for the follow button click
   const handleFollowClick = () => {
     setIsFollowing(!isFollowing);
   };
@@ -130,7 +120,8 @@ const UserProfile = ({ onClose, userId}) => {
   return (
     <>
       <div className="fixed inset-0 z-50 bg-black text-white bg-opacity-50 overflow-y-auto">
-        <div className="min-h-screen flex items-center justify-center p-4 sm:p-6">
+        {!userData && message && <div className="min-h-screen flex items-center justify-center p-4 sm:p-6 text-white ">{message}<X className="text-red-500 ml-3 bg-slate-100 rounded-md" onClick={onClose}/></div>}
+        {userData && <div className="min-h-screen flex items-center justify-center p-4 sm:p-6">
           <main
             id="user-profile-card"
             className="relative rounded-2xl shadow-xl max-w-4xl w-full overflow-hidden"
@@ -151,7 +142,7 @@ const UserProfile = ({ onClose, userId}) => {
                   <img
                     id="profile-pic"
                     className="h-24 w-24 sm:h-32 sm:w-32 rounded-full border-4 border-blue-600 object-cover shadow-md"
-                    src="https://placehold.co/128x128/e2e8f0/64748b?text=JD"
+                    src={userData.picture}
                     alt="User profile picture"
                   />
                   {/* <span
@@ -161,24 +152,16 @@ const UserProfile = ({ onClose, userId}) => {
                 </div>
                 <div className="text-green-400 flex-1 text-center sm:text-left sm:ml-6">
                   <h2 className=" text-2xl sm:text-3xl font-bold">
-                    Jane Doe{" "}
+                    {userData.name}
                   </h2>
                   <p className="text-blue-500 text-sm sm:text-base">
-                    @janedoe_official
+                    {userData.username}
                   </p>
                   <p className="text-green-400 mt-2 text-sm sm:text-base max-w-lg mx-auto sm:mx-0">
-                    Currently a <strong>Lead Frontend Developer</strong> at{" "}
-                    <strong>Tech Innovations Inc.</strong>, specializing in
-                    scalable and intuitive web applications.
+                    {userData.bio}
                   </p>
                   <div className="flex flex-wrap gap-2 mt-2">
-                    {[
-                      "JavaScript",
-                      "React.js",
-                      "UI/UX Design",
-                      "Tailwind CSS",
-                      "Information Architecture",
-                    ].map((skill) => (
+                    {userData.tags.map((skill) => (
                       <span
                         key={skill}
                         className="bg-teal-100 text-gray-600 text-xs font-bold px-3 py-1 rounded-full"
@@ -217,32 +200,39 @@ const UserProfile = ({ onClose, userId}) => {
                 </h3>
                 <p className=" text-sm sm:text-base mb-4">
                   This chart visualizes key engagement metrics, providing a
-                  quick overview of Jane's activity and reach on the platform.
+                  quick overview of {userData.name}'s activity and reach on the platform.
                 </p>
-                <div className="bg-slate-50 p-4 rounded-lg shadow-inner h-[300px] sm:h-[360px]">
+                <div className="p-4 rounded-lg shadow-inner h-[300px] sm:h-[360px]">
                   <canvas ref={chartRef} id="engagementChart"></canvas>
                 </div>
                 <div className="flex justify-around text-center mt-6">
-                  <div>
-                    <p className="text-2xl font-bold text-green-400">1.2K</p>
+                  <div className="text-[#58cc5c]">
+                    <p className="text-2xl font-bold">{userData.followers}</p>
                     <p className="text-sm">Followers</p>
                   </div>
-                  <div>
-                    <p className="text-2xl font-bold text-green-400">300</p>
+                  <div className="text-[#54c0e8]">
+                    <p className="text-2xl font-bold">{userData.following}</p>
                     <p className="text-sm">Following</p>
                   </div>
-                  <div>
-                    <p className="text-2xl font-bold text-green-400">85</p>
+                  <div className="text-[#edd86f]">
+                    <p className="text-2xl font-bold">{userData.posts}</p>
                     <p className="text-sm">Posts</p>
                   </div>
                 </div>
                 <p className="text-xs sm:text-sm mt-4 text-center text-slate-300">
-                  Joined: January 15, 2023 | Last Active: 2 hours ago
+                  Joined: {new Date(userData.createdAt).toLocaleString("en-IN", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                        hour: "numeric",
+                        minute: "2-digit",
+                        hour12: true,
+                      })} | Last Active: 2 hours ago
                 </p>
               </div>
             </div>
           </main>
-        </div>
+        </div>}
       </div>
     </>
   );
