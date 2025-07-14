@@ -7,7 +7,7 @@
         { withCredentials: true }
       );
       if (res.data.success) {
-        console.log(res.data);
+        toast.warn('Allow third party cookies.if already allowed then ignore it.')
         
         setPosts((prev) => [...prev, ...res.data.posts]);
         setHasMore(res.data.hasMore);
