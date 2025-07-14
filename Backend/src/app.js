@@ -8,7 +8,6 @@ const app=express();
 app.use(cors({
    origin:"https://linkelfrontend.onrender.com",
    credentials: true ,
-   exposedHeaders: ["Set-Cookie"],
 }));
 app.use(express.json({limit:'16kb'}));
 app.use(express.urlencoded({extended:true,limit:'16kb'}));
