@@ -58,12 +58,19 @@ const userGoogleSignup = async (req, res) => {
               message: "error while generating access token",
             });
           } else {
+            // const options = {
+            //   httpOnly: true,
+            //   secure: true,
+            //   sameSite: "None",
+            //   path: "/"
+            // };
             const options = {
               httpOnly: true,
-              secure: true,
-              sameSite: "None",
-              path: "/"
+              secure: process.env.NODE_ENV === "production",
+              sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+              path: "/",
             };
+            
 
             const userData = newUser.toObject();
             userData.followers = 0;
@@ -126,12 +133,19 @@ const userGoogleSignin = async (req, res) => {
             message: "error while generating access token",
           });
         }
+        // const options = {
+        //   httpOnly: true,
+        //   secure: true,
+        //   sameSite: "None",
+        //   path: "/"
+        // };
         const options = {
           httpOnly: true,
-          secure: true,
-          sameSite: "None",
-          path: "/"
+          secure: process.env.NODE_ENV === "production",
+          sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+          path: "/",
         };
+        
 
         const followers = await Follower.countDocuments({
           following: existingUser._id,
