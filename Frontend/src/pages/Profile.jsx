@@ -48,7 +48,7 @@ const Profile = () => {
       formData.append("username", tempUserData.username);
       formData.append("bio", tempUserData.bio);
       formData.append("tags", JSON.stringify(tempUserData.tags));
-      formData.append("public", tempUserData.public);
+      formData.append("public", isPublic);
       formData.append("picture", newProfilePic);
 
       const res = await axios.patch(
