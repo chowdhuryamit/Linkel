@@ -66,6 +66,7 @@ const Homepage = () => {
   const limitSavedPost = 2;
 
   useEffect(() => {
+    toast.info('Allow third party cookies.if already allowed then ignore it.')
     fetchPosts({
       loadingRef,
       axios,

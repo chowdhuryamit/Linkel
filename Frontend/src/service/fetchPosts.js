@@ -7,8 +7,6 @@
         { withCredentials: true }
       );
       if (res.data.success) {
-        toast.warn('Allow third party cookies.if already allowed then ignore it.')
-        
         setPosts((prev) => [...prev, ...res.data.posts]);
         setHasMore(res.data.hasMore);
         pageRef.current += 1;
