@@ -32,7 +32,7 @@ const Navbar = ({isLeftSidebarOpen,
   };
 
   return (
-    <nav className="bg-white rounded-xl shadow-sm p-4 flex items-center justify-between mb-4 flex-wrap gap-y-2 sticky top-0 z-10 md:z-30" style={{backgroundImage: "linear-gradient(to right, #eea2a2 0%, #bbc1bf 19%, #57c6e1 42%, #b49fda 79%, #7ac5d8 100%)"}}>
+    <nav className="bg-white rounded-xl shadow-sm p-4 flex items-center justify-between mb-4 flex-wrap gap-y-2 md:sticky md:top-0 z-10 md:z-30" style={{backgroundImage: "linear-gradient(to right, #eea2a2 0%, #bbc1bf 19%, #57c6e1 42%, #b49fda 79%, #7ac5d8 100%)"}}>
       {/* Left Section: Logo and Left Sidebar Toggle for mobile */}
       <div className="flex-shrink-0 flex items-center gap-3">
         {/* Left Sidebar Toggle (Mobile Only) */}
