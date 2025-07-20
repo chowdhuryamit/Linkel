@@ -128,6 +128,8 @@ const unfollowUser = async (req, res) => {
         .status(400)
         .json({ success: false, message: "user does not exist" });
     }
+    await MutualFriends.findOneAndUpdate({userId:userId},{$pull:{friendList:req.user._id}});
+    await MutualFriends.findOneAndUpdate({userId:req.user._id},{$pull:{friendList:userId}});
     const follow = await Follower.findOneAndDelete({
       following: userId,
       follower: req.user._id,
