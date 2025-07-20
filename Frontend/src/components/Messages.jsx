@@ -20,11 +20,7 @@ const Messages = () => {
 
   // Function to go back to the previous view
   const goBack = () => {
-    if (currentView === 'chat') {
-      setCurrentView('friendsList'); // From chat, go back to friends list
-    } else {
-      setCurrentView('friendsList'); // From notifications, go back to friends list (assuming this is the root)
-    }
+    setCurrentView('friendsList');
   };
 
   return (

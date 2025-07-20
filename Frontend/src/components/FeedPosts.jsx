@@ -54,7 +54,6 @@ const FeedPosts = ({ userData, posts, hasMore, fetchPosts }) => {
     }
   };
   const unfollowFunction = async () => {
-    console.log("inside unfollow function");
 
     try {
       const res = await axios.post(
